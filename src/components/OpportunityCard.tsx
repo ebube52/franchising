@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, Calendar } from 'lucide-react';
+import { Users, Calendar, Star } from 'lucide-react';
 
 interface Opportunity {
   id: string;
@@ -61,7 +61,15 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({ opportunity, o
         </div>
 
         {/* Title */}
-        <h3 className="text-xl font-bold text-gray-900 mb-3">{opportunity.title}</h3>
+        <div className="flex items-center gap-2 mb-3">
+          <h3 className="text-xl font-bold text-gray-900">{opportunity.title}</h3>
+          {opportunity.partners.includes('⭐') && (
+            <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold flex items-center gap-1">
+              <Star className="w-3 h-3" />
+              Featured
+            </span>
+          )}
+        </div>
 
         {/* Investment */}
         <div className="space-y-2 mb-4">

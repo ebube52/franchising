@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Search, ChevronDown, Users, MessageSquare, FileText, User, Settings, Shield, LogOut } from 'lucide-react';
+import { Search, ChevronDown, Users, MessageSquare, FileText, User, Settings, Shield, LogOut, Plus, Star } from 'lucide-react';
 import { FranchiseQuizModal } from './FranchiseQuizModal';
 import { OpportunityCard } from './OpportunityCard';
 import { FranchiseDetailModal } from './FranchiseDetailModal';
+import { FranchiseSubmissionForm } from './FranchiseSubmissionForm';
+import { AdminDashboard } from './AdminDashboard';
 
 interface Opportunity {
   id: string;
@@ -13,6 +15,34 @@ interface Opportunity {
   postedDate: string;
   partners: string;
   type: 'franchise' | 'business' | 'real-estate';
+  website?: string;
+  mlsNumber?: string;
+  propertyType?: string;
+  bedrooms?: string;
+  bathrooms?: string;
+  sqft?: string;
+  yearBuilt?: string;
+  maintenance?: string;
+  taxes?: string;
+  rentalIncome?: string;
+}
+
+interface PendingFranchise {
+  id: string;
+  franchiseName: string;
+  industry: string;
+  investmentMin: string;
+  investmentMax: string;
+  region: string;
+  description: string;
+  contactName: string;
+  contactEmail: string;
+  contactPhone: string;
+  website: string;
+  listingType: 'free' | 'featured';
+  status: 'pending' | 'approved' | 'rejected';
+  createdAt: string;
+  image?: string;
 }
 
 const mockOpportunities: Opportunity[] = [
@@ -187,6 +217,9 @@ export const BusinessOpportunities: React.FC = () => {
   const [opportunities, setOpportunities] = useState<Opportunity[]>(mockOpportunities);
   const [showFranchiseResults, setShowFranchiseResults] = useState(false);
   const [selectedOpportunity, setSelectedOpportunity] = useState<Opportunity | null>(null);
+  const [showSubmissionForm, setShowSubmissionForm] = useState(false);
+  const [showAdminDashboard, setShowAdminDashboard] = useState(false);
+  const [pendingFranchises, setPendingFranchises] = useState<PendingFranchise[]>([]);
 
   const categories = [
     'All Categories',
@@ -262,6 +295,64 @@ export const BusinessOpportunities: React.FC = () => {
     setShowFranchiseResults(false);
   };
 
+  const handleFranchiseSubmission = (submissionData: any) => {
+    const newFranchise: PendingFranchise = {
+      ...submissionData,
+      status: 'pending' as const
+    };
+    
+    setPendingFranchises(prev => [...prev, newFranchise]);
+    setShowSubmissionForm(false);
+    
+    // Show success message (you could add a toast notification here)
+    alert('Franchise submission received! We\'ll review it within 24-48 hours.');
+  };
+
+  const handleApproveFranchise = (id: string) => {
+    setPendingFranchises(prev => 
+      prev.map(franchise => 
+        franchise.id === id 
+          ? { ...franchise, status: 'approved' as const }
+          : franchise
+      )
+    );
+    
+    // Add to main opportunities list
+    const approvedFranchise = pendingFranchises.find(f => f.id === id);
+    if (approvedFranchise) {
+      const newOpportunity: Opportunity = {
+        id: approvedFranchise.id,
+        title: approvedFranchise.franchiseName,
+        image: approvedFranchise.image || 'https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg',
+        investment: `$${parseInt(approvedFranchise.investmentMin).toLocaleString()} - $${parseInt(approvedFranchise.investmentMax).toLocaleString()}`,
+        description: approvedFranchise.description,
+        postedDate: 'Available Now',
+        partners: approvedFranchise.listingType === 'featured' ? '⭐ Featured' : 'Standard Listing',
+        type: 'franchise',
+        website: approvedFranchise.website
+      };
+      
+      setOpportunities(prev => {
+        // If featured, add to beginning; otherwise add to end
+        if (approvedFranchise.listingType === 'featured') {
+          return [newOpportunity, ...prev];
+        } else {
+          return [...prev, newOpportunity];
+        }
+      });
+    }
+  };
+
+  const handleRejectFranchise = (id: string) => {
+    setPendingFranchises(prev => 
+      prev.map(franchise => 
+        franchise.id === id 
+          ? { ...franchise, status: 'rejected' as const }
+          : franchise
+      )
+    );
+  };
+
   const filteredOpportunities = opportunities.filter(opp => {
     const matchesSearch = opp.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          opp.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -271,6 +362,26 @@ export const BusinessOpportunities: React.FC = () => {
                            (selectedCategory === 'Real Estate' && opp.type === 'real-estate');
     return matchesSearch && matchesCategory;
   });
+
+  // Sort opportunities to show featured first
+  const sortedOpportunities = filteredOpportunities.sort((a, b) => {
+    const aFeatured = a.partners.includes('⭐');
+    const bFeatured = b.partners.includes('⭐');
+    if (aFeatured && !bFeatured) return -1;
+    if (!aFeatured && bFeatured) return 1;
+    return 0;
+  });
+
+  if (showAdminDashboard) {
+    return (
+      <AdminDashboard
+        onBack={() => setShowAdminDashboard(false)}
+        pendingFranchises={pendingFranchises}
+        onApprove={handleApproveFranchise}
+        onReject={handleRejectFranchise}
+      />
+    );
+  }
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -318,9 +429,17 @@ export const BusinessOpportunities: React.FC = () => {
               <Settings className="w-5 h-5" />
               <span>Settings</span>
             </div>
-            <div className="flex items-center gap-3 px-3 py-2 text-blue-600 hover:bg-blue-50 rounded-lg cursor-pointer">
+            <div 
+              className="flex items-center gap-3 px-3 py-2 text-blue-600 hover:bg-blue-50 rounded-lg cursor-pointer"
+              onClick={() => setShowAdminDashboard(true)}
+            >
               <Shield className="w-5 h-5" />
               <span>Admin</span>
+              {pendingFranchises.filter(f => f.status === 'pending').length > 0 && (
+                <span className="bg-red-500 text-white text-xs rounded-full px-2 py-0.5 ml-auto">
+                  {pendingFranchises.filter(f => f.status === 'pending').length}
+                </span>
+              )}
             </div>
             <div className="flex items-center gap-3 px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg cursor-pointer">
               <LogOut className="w-5 h-5" />
@@ -335,10 +454,29 @@ export const BusinessOpportunities: React.FC = () => {
         <div className="p-8">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Business Opportunities</h1>
-            <button className="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm hover:bg-gray-200 transition-colors">
-              Saved to this PC
-            </button>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Business Opportunities</h1>
+              <p className="text-gray-600 mt-1">
+                {sortedOpportunities.length} opportunities available
+                {sortedOpportunities.filter(o => o.partners.includes('⭐')).length > 0 && (
+                  <span className="ml-2 text-yellow-600 font-medium">
+                    • {sortedOpportunities.filter(o => o.partners.includes('⭐')).length} featured
+                  </span>
+                )}
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={() => setShowSubmissionForm(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg font-medium hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+              >
+                <Plus className="w-4 h-4" />
+                Submit Franchise
+              </button>
+              <button className="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm hover:bg-gray-200 transition-colors">
+                Saved to this PC
+              </button>
+            </div>
           </div>
 
           {/* Search and Filters */}
@@ -394,7 +532,7 @@ export const BusinessOpportunities: React.FC = () => {
           {/* Results Header */}
           {/* Opportunities Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredOpportunities.map((opportunity) => (
+            {sortedOpportunities.map((opportunity) => (
               <OpportunityCard 
                 key={opportunity.id} 
                 opportunity={opportunity}
@@ -404,7 +542,7 @@ export const BusinessOpportunities: React.FC = () => {
           </div>
 
           {/* Empty State */}
-          {filteredOpportunities.length === 0 && (
+          {sortedOpportunities.length === 0 && (
             <div className="text-center py-12">
               <div className="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
                 <Search className="w-8 h-8 text-gray-400" />
@@ -427,6 +565,14 @@ export const BusinessOpportunities: React.FC = () => {
         <FranchiseQuizModal
           onClose={() => setShowQuizModal(false)}
           onComplete={handleQuizComplete}
+        />
+      )}
+
+      {/* Franchise Submission Form */}
+      {showSubmissionForm && (
+        <FranchiseSubmissionForm
+          onClose={() => setShowSubmissionForm(false)}
+          onSubmit={handleFranchiseSubmission}
         />
       )}
 
