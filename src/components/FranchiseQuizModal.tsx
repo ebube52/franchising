@@ -61,7 +61,6 @@ const quizSteps: QuizStep[] = [
 
 // Import real franchise data
 import { getMatchingFranchises } from '../data/franchiseData';
-import { franchiseAPIService } from '../services/franchiseAPIService';
 import { FranchiseMatchRequest } from '../types/franchise';
 
 interface FranchiseQuizModalProps {
@@ -117,23 +116,12 @@ export const FranchiseQuizModal: React.FC<FranchiseQuizModalProps> = ({ onClose,
     try {
       console.log('Searching franchise APIs with criteria:', criteria);
       
-      // Try to fetch from real APIs first
-      const apiMatches = await franchiseAPIService.searchAllAPIs(criteria);
-      
-      if (apiMatches.length > 0) {
-        console.log('=== API MATCHES FOUND ===');
-        console.log('Number of API matches:', apiMatches.length);
-        console.log('API Matches:', apiMatches.map(m => `${m.name} (${m.industry})`));
-        onComplete(apiMatches);
-      } else {
-        // Fallback to local data if no API results
-        console.log('No API matches, falling back to local data');
-        const localMatches = getMatchingFranchises(criteria);
-        console.log('=== LOCAL MATCHES ===');
-        console.log('Number of local matches:', localMatches.length);
-        console.log('Local Matches:', localMatches.map(m => `${m.name} (${m.industry})`));
-        onComplete(localMatches);
-      }
+      // Use local data for now (API integration ready for when keys are available)
+      const localMatches = getMatchingFranchises(criteria);
+      console.log('=== LOCAL MATCHES ===');
+      console.log('Number of local matches:', localMatches.length);
+      console.log('Local Matches:', localMatches.map(m => `${m.name} (${m.industry})`));
+      onComplete(localMatches);
     } catch (error) {
       console.error('Error fetching franchise matches:', error);
       // Always fallback to local data on error
