@@ -6,37 +6,37 @@ export const canadianFranchiseAPIs = {
   // Canadian Franchise Association - Official API
   cfa: {
     name: 'Canadian Franchise Association',
-    baseUrl: 'https://api.cfa.ca/v1',
+    baseUrl: 'https://www.cfa.ca/opportunities',
     apiKey: import.meta.env.VITE_CFA_API_KEY,
     endpoints: {
-      search: '/franchises/search',
-      details: '/franchises/{id}',
+      search: '/search',
+      details: '/franchise-details',
       categories: '/categories',
-      provinces: '/locations/provinces'
+      provinces: '/locations'
     },
     rateLimit: 100, // requests per hour
-    documentation: 'https://www.cfa.ca/api-docs'
+    documentation: 'https://www.cfa.ca/franchise-opportunities'
   },
 
   // Franchise Canada Directory
   franchiseCanada: {
     name: 'Franchise Canada Directory',
-    baseUrl: 'https://api.franchisecanada.online/v1',
+    baseUrl: 'https://www.franchisecanada.online/opportunities',
     apiKey: import.meta.env.VITE_FRANCHISE_CANADA_API_KEY,
     endpoints: {
       opportunities: '/opportunities',
       search: '/search',
-      provinces: '/locations/provinces',
+      provinces: '/locations',
       industries: '/industries'
     },
     rateLimit: 200,
-    documentation: 'https://franchisecanada.online/api'
+    documentation: 'https://www.franchisecanada.online/franchise-directory'
   },
 
   // BeTheBoss.ca - Canadian Franchise Portal
   beTheBoss: {
     name: 'BeTheBoss.ca',
-    baseUrl: 'https://api.betheboss.ca/v2',
+    baseUrl: 'https://www.betheboss.ca/franchises',
     apiKey: import.meta.env.VITE_BETHEBOSS_API_KEY,
     endpoints: {
       franchises: '/franchises',
@@ -45,28 +45,28 @@ export const canadianFranchiseAPIs = {
       locations: '/locations'
     },
     rateLimit: 150,
-    documentation: 'https://www.betheboss.ca/api-docs'
+    documentation: 'https://www.betheboss.ca/franchise-opportunities'
   },
 
   // FranchiseDirect Canada
   franchiseDirect: {
     name: 'FranchiseDirect Canada',
-    baseUrl: 'https://api.franchisedirect.ca/v1',
+    baseUrl: 'https://www.franchisedirect.ca/franchises',
     apiKey: import.meta.env.VITE_FRANCHISEDIRECT_API_KEY,
     endpoints: {
       opportunities: '/opportunities',
       search: '/search',
-      details: '/opportunities/{id}',
-      provinces: '/provinces'
+      details: '/franchise-details',
+      provinces: '/locations'
     },
     rateLimit: 100,
-    documentation: 'https://www.franchisedirect.ca/api'
+    documentation: 'https://www.franchisedirect.ca/franchise-opportunities'
   },
 
   // FranchiseGlobal Canada Section
   franchiseGlobal: {
     name: 'FranchiseGlobal Canada',
-    baseUrl: 'https://api.franchiseglobal.com/canada/v1',
+    baseUrl: 'https://www.franchiseglobal.com/canada/franchises',
     apiKey: import.meta.env.VITE_FRANCHISEGLOBAL_API_KEY,
     endpoints: {
       franchises: '/franchises',
@@ -75,13 +75,13 @@ export const canadianFranchiseAPIs = {
       regions: '/regions'
     },
     rateLimit: 120,
-    documentation: 'https://www.franchiseglobal.com/api'
+    documentation: 'https://www.franchiseglobal.com/canada/opportunities'
   },
 
   // BizBuySell Canada - Franchise Section
   bizBuySell: {
     name: 'BizBuySell Canada',
-    baseUrl: 'https://api.bizbuysell.ca/v1',
+    baseUrl: 'https://www.bizbuysell.ca/franchises',
     apiKey: import.meta.env.VITE_BIZBUYSELL_API_KEY,
     endpoints: {
       franchises: '/franchises',
@@ -90,7 +90,7 @@ export const canadianFranchiseAPIs = {
       locations: '/locations'
     },
     rateLimit: 80,
-    documentation: 'https://www.bizbuysell.ca/api'
+    documentation: 'https://www.bizbuysell.ca/franchise-opportunities'
   }
 };
 

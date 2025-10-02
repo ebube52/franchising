@@ -146,14 +146,15 @@ export const FranchiseDetailModal: React.FC<FranchiseDetailModalProps> = ({
               <div className="flex items-center gap-2 text-blue-600">
                 <span className="text-sm">🔗</span>
                 <span className="text-sm">Source: </span>
-                <a 
-                  href={opportunity.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 underline"
+                <button
+                  onClick={() => {
+                    // Show detailed franchise information in modal instead of external link
+                    console.log('Showing detailed franchise info for:', opportunity.title);
+                  }}
+                  className="text-blue-600 hover:text-blue-800 underline cursor-pointer"
                 >
-                  {opportunity.website}
-                </a>
+                  View Franchise Details
+                </button>
               </div>
             </div>
           )}
