@@ -239,21 +239,19 @@ export const BusinessOpportunities: React.FC = () => {
     if (matches && matches.length > 0) {
       console.log('Match details:', matches.map(m => `${m.name} - ${m.industry}`));
     }
-      console.log('Match details:', matches.map(m => `${m.name} - ${m.industry}`));
-    }
     
     if (matches && matches.length > 0) {
       // Convert franchise matches to opportunity format with real data
-        const formatCurrency = (min: number, max: number) => {
-          const formatNumber = (num: number) => {
-            if (num >= 1000000) return `$${(num / 1000000).toFixed(1)}M`;
-            if (num >= 1000) return `$${(num / 1000).toFixed(0)}K`;
-            return `$${num.toLocaleString()}`;
-          };
-          return `${formatNumber(min)} - ${formatNumber(max)}`;
+      const formatCurrency = (min: number, max: number) => {
+        const formatNumber = (num: number) => {
+          if (num >= 1000000) return `$${(num / 1000000).toFixed(1)}M`;
+          if (num >= 1000) return `$${(num / 1000).toFixed(0)}K`;
+          return `$${num.toLocaleString()}`;
         };
+        return `${formatNumber(min)} - ${formatNumber(max)}`;
+      };
 
-        const franchiseOpportunities = matches.map((franchise) => {
+      const franchiseOpportunities = matches.map((franchise) => {
         return {
           id: `franchise-${franchise.id}`,
           title: franchise.name || franchise.brand,
@@ -274,6 +272,17 @@ export const BusinessOpportunities: React.FC = () => {
     } else {
       // Fallback: show all available opportunities if no matches
       setOpportunities(mockOpportunities);
+    }
+    
+    setShowQuizModal(false);
+    setSelectedCategory('All Categories');
+  };
+
+  const handleClearFilters = () => {
+    setSearchTerm('');
+    setSelectedCategory('All Categories');
+    setOpportunities(mockOpportunities);
+  };
 
   const handleFranchiseSubmission = (submissionData: any) => {
     const newFranchise: PendingFranchise = {
