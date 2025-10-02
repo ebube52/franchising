@@ -889,6 +889,116 @@ export const fetchRealTimeFranchises = async (criteria: any) => {
     return getMatchingFranchises(criteria);
   }
 };
+// API Integration endpoints for real-time franchise data
+export const franchiseAPIEndpoints = {
+  // Canadian Franchise Association
+  cfa: {
+    baseUrl: 'https://api.cfa.ca/v1/franchises',
+    apiKey: import.meta.env.VITE_CFA_API_KEY,
+    endpoints: {
+      search: '/search',
+      details: '/details',
+      categories: '/categories'
+    }
+  },
+  
+  // BeTheBoss.ca API
+  beTheBoss: {
+    baseUrl: 'https://api.betheboss.ca/v2/franchises',
+    apiKey: import.meta.env.VITE_BETHEBOSS_API_KEY,
+    endpoints: {
+      search: '/search',
+      featured: '/featured',
+      categories: '/categories'
+    }
+  },
+  
+  // FranchiseDirect Canada
+  franchiseDirect: {
+    baseUrl: 'https://api.franchisedirect.ca/v1/opportunities',
+    apiKey: import.meta.env.VITE_FRANCHISEDIRECT_API_KEY,
+    endpoints: {
+      search: '/search',
+      details: '/details',
+      leads: '/leads'
+    }
+  },
+  
+  // FranchiseGlobal Canada Feed
+  franchiseGlobal: {
+    baseUrl: 'https://api.franchiseglobal.com/canada/v1',
+    apiKey: import.meta.env.VITE_FRANCHISEGLOBAL_API_KEY,
+    endpoints: {
+      franchises: '/franchises',
+      search: '/search',
+      regions: '/regions'
+    }
+  },
+  
+  // BizBuySell Canada
+  bizBuySell: {
+    baseUrl: 'https://api.bizbuysell.ca/v1/franchises',
+    apiKey: import.meta.env.VITE_BIZBUYSELL_API_KEY,
+    endpoints: {
+      search: '/search',
+      featured: '/featured',
+      categories: '/categories'
+    }
+  }
+};
+
+// Real-time franchise data fetching functions
+export const fetchRealTimeFranchises = async (criteria: any) => {
+  try {
+    // Primary: Try Canadian Franchise Association API
+    if (franchiseAPIEndpoints.cfa.apiKey) {
+      const cfaResponse = await fetch(`${franchiseAPIEndpoints.cfa.baseUrl}${franchiseAPIEndpoints.cfa.endpoints.search}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${franchiseAPIEndpoints.cfa.apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          industry: criteria.industry,
+          investmentMin: getInvestmentMin(criteria.investmentRange),
+          investmentMax: getInvestmentMax(criteria.investmentRange),
+          region: criteria.region,
+          lifestyle: criteria.lifestyle
+        })
+      });
+      
+      if (cfaResponse.ok) {
+        const cfaData = await cfaResponse.json();
+        return cfaData.franchises || [];
+      }
+    }
+    
+    // Fallback: Try BeTheBoss.ca API
+    if (franchiseAPIEndpoints.beTheBoss.apiKey) {
+      const bossResponse = await fetch(`${franchiseAPIEndpoints.beTheBoss.baseUrl}${franchiseAPIEndpoints.beTheBoss.endpoints.search}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${franchiseAPIEndpoints.beTheBoss.apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(criteria)
+      });
+      
+      if (bossResponse.ok) {
+        const bossData = await bossResponse.json();
+        return bossData.results || [];
+      }
+    }
+    
+    // Final fallback: Use local data
+    return getMatchingFranchises(criteria);
+    
+  } catch (error) {
+    console.error('Error fetching real-time franchise data:', error);
+    // Always fallback to local comprehensive data
+    return getMatchingFranchises(criteria);
+  }
+};
 
 export const getMatchingFranchises = (criteria: any): Franchise[] => {
   console.log('Getting matching franchises for criteria:', criteria);
