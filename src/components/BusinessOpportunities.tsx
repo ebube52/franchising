@@ -239,6 +239,8 @@ export const BusinessOpportunities: React.FC = () => {
     if (matches && matches.length > 0) {
       console.log('Match details:', matches.map(m => `${m.name} - ${m.industry}`));
     }
+      console.log('Match details:', matches.map(m => `${m.name} - ${m.industry}`));
+    }
     
     if (matches && matches.length > 0) {
       // Convert franchise matches to opportunity format with real data
@@ -272,18 +274,6 @@ export const BusinessOpportunities: React.FC = () => {
     } else {
       // Fallback: show all available opportunities if no matches
       setOpportunities(mockOpportunities);
-      setSelectedCategory('Franchises');
-    }
-    setShowFranchiseResults(true);
-    setShowQuizModal(false);
-  };
-
-  const handleClearFilters = () => {
-    setSearchTerm('');
-    setSelectedCategory('All Categories');
-    setOpportunities(mockOpportunities);
-    setShowFranchiseResults(false);
-  };
 
   const handleFranchiseSubmission = (submissionData: any) => {
     const newFranchise: PendingFranchise = {
