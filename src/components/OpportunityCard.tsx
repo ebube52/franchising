@@ -10,6 +10,7 @@ interface Opportunity {
   postedDate: string;
   partners: string;
   type: 'franchise' | 'business' | 'real-estate';
+  status?: 'pending' | 'approved' | 'rejected';
   website?: string;
   mlsNumber?: string;
   propertyType?: string;
@@ -41,6 +42,8 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({ opportunity, o
     }
   };
 
+  const isPending = opportunity.status === 'pending';
+
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200">
       {/* Image */}
@@ -54,12 +57,6 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({ opportunity, o
 
       {/* Content */}
       <div className="p-6">
-        {/* Type Badge */}
-        <div className={`inline-flex px-3 py-1 rounded-full text-xs font-medium border mb-3 ${getTypeColor(opportunity.type)}`}>
-          {opportunity.type === 'franchise' ? 'Franchise' : 
-           opportunity.type === 'business' ? 'Business' : 'Real Estate'}
-        </div>
-
         {/* Title */}
         <div className="flex items-center gap-2 mb-3">
           <h3 className="text-xl font-bold text-gray-900">{opportunity.title}</h3>
@@ -76,7 +73,7 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({ opportunity, o
           <div className="flex items-center gap-2">
             <span className="text-lg">💰</span>
             <div>
-              <span className="text-sm text-gray-600">Price: </span>
+              <span className="text-sm text-gray-600">Investment: </span>
               <span className="font-bold text-green-600 text-lg">{opportunity.investment}</span>
             </div>
           </div>
@@ -119,10 +116,16 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({ opportunity, o
           )}
         </div>
 
-        {/* Description */}
-        <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-4">
-          {opportunity.description.split('\n')[0]}
-        </p>
+        {/* Description or Status */}
+        {isPending ? (
+          <div className="mb-4">
+            <span className="text-orange-600 font-medium">{opportunity.description}</span>
+          </div>
+        ) : (
+          <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-4">
+            {opportunity.description.split('\n')[0]}
+          </p>
+        )}
 
         {/* Learn More Button */}
         <button 
