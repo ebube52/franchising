@@ -320,6 +320,9 @@ const getDefaultFranchiseImage = (category: string): string => {
   return imageMap[normalized] || 'https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg';
 };
 
+// Import fallback data
+import { allCanadianFranchises } from '../data/franchiseData';
+
 // Main API Service Class
 export class CanadianFranchiseAPIService {
   private static instance: CanadianFranchiseAPIService;
@@ -622,9 +625,6 @@ export class CanadianFranchiseAPIService {
 
   // Fallback data when APIs are unavailable
   private getFallbackFranchises(source: string): Franchise[] {
-    // Import local franchise data as fallback
-    const { allCanadianFranchises } = require('../data/franchiseData');
-    
     console.log(`🔄 Using fallback data for ${source} (${allCanadianFranchises.length} franchises)`);
     
     // Add source identifier to fallback data
