@@ -1,588 +1,977 @@
-import React, { useState } from 'react';
-import { Search, ChevronDown, Users, MessageSquare, FileText, User, Settings, Shield, LogOut, Plus, Star } from 'lucide-react';
-import { FranchiseQuizModal } from './FranchiseQuizModal';
-import { OpportunityCard } from './OpportunityCard';
-import { FranchiseDetailModal } from './FranchiseDetailModal';
-import { FranchiseSubmissionForm } from './FranchiseSubmissionForm';
-import { AdminDashboard } from './AdminDashboard';
+import { Franchise } from '../types/franchise';
 
-interface Opportunity {
-  id: string;
-  title: string;
-  image: string;
-  investment: string;
-  description: string;
-  postedDate: string;
-  partners: string;
-  type: 'franchise' | 'business' | 'real-estate';
-  website?: string;
-  mlsNumber?: string;
-  propertyType?: string;
-  bedrooms?: string;
-  bathrooms?: string;
-  sqft?: string;
-  yearBuilt?: string;
-  maintenance?: string;
-  taxes?: string;
-  rentalIncome?: string;
-}
+// Streamlined Canadian franchises focused on 5 key categories
+export const canadianFranchises: Franchise[] = [
+  // FOOD & BEVERAGE FRANCHISES
+  {
+    id: 'tim-hortons-1',
+    name: 'Tim Hortons',
+    brand: 'Tim Hortons',
+    industry: 'Food & Beverage',
+    investmentMin: 438000,
+    investmentMax: 2200000,
+    region: ['Ontario', 'Quebec', 'Canada-Wide'],
+    description: 'Canada\'s iconic coffee and donut chain offering a proven business model with strong brand recognition and comprehensive support system.',
+    image: 'https://images.pexels.com/photos/302899/pexels-photo-302899.jpeg',
+    businessModel: 'Quick Service Restaurant',
+    supportProvided: ['Training', 'Marketing', 'Operations', 'Site Selection'],
+    franchiseFee: 50000,
+    royaltyFee: '4.5%',
+    territories: 4000,
+    established: 1964,
+    website: 'https://www.timhortons.com/ca/en/corporate/franchise-with-us.php',
+    contactInfo: {
+      phone: '1-888-601-8486',
+      email: 'franchise@timhortons.com'
+    },
+    requirements: {
+      liquidCapital: 500000,
+      netWorth: 1500000,
+      experience: 'Business or restaurant experience preferred'
+    }
+  },
+  {
+    id: 'subway-canada-1',
+    name: 'Subway Canada',
+    brand: 'Subway',
+    industry: 'Food & Beverage',
+    investmentMin: 116000,
+    investmentMax: 263000,
+    region: ['Ontario', 'Quebec', 'Canada-Wide'],
+    description: 'World\'s largest submarine sandwich franchise with flexible formats and strong support system for Canadian entrepreneurs.',
+    image: 'https://images.pexels.com/photos/7129052/pexels-photo-7129052.jpeg',
+    businessModel: 'Quick Service Restaurant',
+    supportProvided: ['Training', 'Marketing', 'Operations', 'Menu Development'],
+    franchiseFee: 15000,
+    royaltyFee: '8%',
+    territories: 3000,
+    established: 1965,
+    website: 'https://www.subway.com/en-ca/explore/franchising',
+    contactInfo: {
+      phone: '1-800-888-4848',
+      email: 'development@subway.com'
+    },
+    requirements: {
+      liquidCapital: 80000,
+      netWorth: 150000,
+      experience: 'Business experience helpful'
+    }
+  },
+  {
+    id: 'pizza-pizza-1',
+    name: 'Pizza Pizza',
+    brand: 'Pizza Pizza',
+    industry: 'Food & Beverage',
+    investmentMin: 200000,
+    investmentMax: 400000,
+    region: ['Ontario', 'Quebec'],
+    description: 'Canada\'s leading pizza delivery and takeout chain with strong brand recognition in Ontario and Quebec markets.',
+    image: 'https://images.pexels.com/photos/315755/pexels-photo-315755.jpeg',
+    businessModel: 'Quick Service Restaurant',
+    supportProvided: ['Training', 'Marketing', 'Operations', 'Technology'],
+    franchiseFee: 25000,
+    royaltyFee: '6%',
+    territories: 500,
+    established: 1967,
+    website: 'https://www.pizzapizza.ca/franchise/',
+    contactInfo: {
+      phone: '1-416-967-1010',
+      email: 'franchise@pizzapizza.ca'
+    },
+    requirements: {
+      liquidCapital: 150000,
+      netWorth: 350000,
+      experience: 'Restaurant experience preferred'
+    }
+  },
+  {
+    id: 'boston-pizza-1',
+    name: 'Boston Pizza',
+    brand: 'Boston Pizza',
+    industry: 'Food & Beverage',
+    investmentMin: 1200000,
+    investmentMax: 1800000,
+    region: ['Ontario', 'Canada-Wide'],
+    description: 'Canada\'s #1 casual dining brand combining restaurant, sports bar, and take-out/delivery services.',
+    image: 'https://images.pexels.com/photos/1566837/pexels-photo-1566837.jpeg',
+    businessModel: 'Casual Dining Restaurant',
+    supportProvided: ['Training', 'Marketing', 'Operations', 'Menu Development'],
+    franchiseFee: 60000,
+    royaltyFee: '7%',
+    territories: 390,
+    established: 1964,
+    website: 'https://www.bostonpizza.com/en/franchise.html',
+    contactInfo: {
+      phone: '1-604-270-1108',
+      email: 'franchise@bostonpizza.com'
+    },
+    requirements: {
+      liquidCapital: 500000,
+      netWorth: 1500000,
+      experience: 'Restaurant management experience required'
+    }
+  },
+  {
+    id: 'a-w-canada-1',
+    name: 'A&W Canada',
+    brand: 'A&W',
+    industry: 'Food & Beverage',
+    investmentMin: 500000,
+    investmentMax: 1200000,
+    region: ['Ontario', 'Canada-Wide'],
+    description: 'Canada\'s original burger family restaurant with grass-fed beef and hormone-free chicken commitment.',
+    image: 'https://images.pexels.com/photos/1639557/pexels-photo-1639557.jpeg',
+    businessModel: 'Quick Service Restaurant',
+    supportProvided: ['Training', 'Marketing', 'Operations', 'Supply Chain'],
+    franchiseFee: 50000,
+    royaltyFee: '3%',
+    territories: 950,
+    established: 1956,
+    website: 'https://web.aw.ca/en/franchise',
+    contactInfo: {
+      phone: '1-604-988-2141',
+      email: 'franchise@aw.ca'
+    },
+    requirements: {
+      liquidCapital: 400000,
+      netWorth: 1000000,
+      experience: 'Restaurant experience preferred'
+    }
+  },
+  {
+    id: 'dairy-queen-1',
+    name: 'Dairy Queen Canada',
+    brand: 'Dairy Queen',
+    industry: 'Food & Beverage',
+    investmentMin: 362000,
+    investmentMax: 1800000,
+    region: ['Ontario', 'Canada-Wide'],
+    description: 'Famous for soft-serve ice cream, Blizzards, and hot food menu with strong seasonal performance across Canada.',
+    image: 'https://images.pexels.com/photos/1352278/pexels-photo-1352278.jpeg',
+    businessModel: 'Quick Service Restaurant',
+    supportProvided: ['Training', 'Marketing', 'Operations', 'Product Development'],
+    franchiseFee: 45000,
+    royaltyFee: '4%',
+    territories: 700,
+    established: 1940,
+    website: 'https://www.dairyqueen.com/ca-en/franchise/',
+    contactInfo: {
+      phone: '1-952-830-0200',
+      email: 'franchise@dq.ca'
+    },
+    requirements: {
+      liquidCapital: 400000,
+      netWorth: 750000,
+      experience: 'Food service experience helpful'
+    }
+  },
 
-interface PendingFranchise {
-  id: string;
-  franchiseName: string;
-  industry: string;
-  investmentMin: string;
-  investmentMax: string;
-  region: string;
-  description: string;
-  contactName: string;
-  contactEmail: string;
-  contactPhone: string;
-  website: string;
-  listingType: 'free' | 'featured';
-  status: 'pending' | 'approved' | 'rejected';
-  createdAt: string;
-  image?: string;
-}
+  // BUSINESS SERVICES FRANCHISES
+  {
+    id: 'molly-maid-1',
+    name: 'Molly Maid',
+    brand: 'Molly Maid',
+    industry: 'Business Services',
+    investmentMin: 90000,
+    investmentMax: 120000,
+    region: ['Ontario', 'Canada-Wide'],
+    description: 'Leading residential cleaning service franchise with home-based business model and flexible scheduling options.',
+    image: 'https://images.pexels.com/photos/4239031/pexels-photo-4239031.jpeg',
+    businessModel: 'Service-Based',
+    supportProvided: ['Training', 'Marketing', 'Operations', 'Technology'],
+    franchiseFee: 39000,
+    royaltyFee: '6%',
+    territories: 450,
+    established: 1984,
+    website: 'https://www.mollymaid.ca/franchise/',
+    contactInfo: {
+      phone: '1-800-665-5962',
+      email: 'franchise@mollymaid.ca'
+    },
+    requirements: {
+      liquidCapital: 75000,
+      netWorth: 150000,
+      experience: 'Management experience preferred'
+    }
+  },
+  {
+    id: 'jani-king-1',
+    name: 'Jani-King Canada',
+    brand: 'Jani-King',
+    industry: 'Business Services',
+    investmentMin: 11000,
+    investmentMax: 35000,
+    region: ['Ontario', 'Canada-Wide'],
+    description: 'World\'s largest commercial cleaning franchise with guaranteed customer base and ongoing support system.',
+    image: 'https://images.pexels.com/photos/4099354/pexels-photo-4099354.jpeg',
+    businessModel: 'Service-Based',
+    supportProvided: ['Training', 'Customer Base', 'Equipment', 'Marketing'],
+    franchiseFee: 8500,
+    royaltyFee: '10%',
+    territories: 120,
+    established: 1969,
+    website: 'https://www.janiking.ca/franchise-opportunities/',
+    contactInfo: {
+      phone: '1-800-552-5264',
+      email: 'info@janiking.ca'
+    },
+    requirements: {
+      liquidCapital: 15000,
+      netWorth: 50000,
+      experience: 'No experience required'
+    }
+  },
+  {
+    id: 'minuteman-press-1',
+    name: 'Minuteman Press',
+    brand: 'Minuteman Press',
+    industry: 'Business Services',
+    investmentMin: 125000,
+    investmentMax: 275000,
+    region: ['Ontario', 'Canada-Wide'],
+    description: 'Full-service printing and marketing solutions franchise serving small to medium businesses across Canada.',
+    image: 'https://images.pexels.com/photos/1089438/pexels-photo-1089438.jpeg',
+    businessModel: 'B2B Service',
+    supportProvided: ['Training', 'Marketing', 'Technology', 'Operations'],
+    franchiseFee: 44500,
+    royaltyFee: '6%',
+    territories: 950,
+    established: 1973,
+    website: 'https://www.minutemanpressfranchise.ca/',
+    contactInfo: {
+      phone: '1-800-645-3006',
+      email: 'info@minutemanpress.ca'
+    },
+    requirements: {
+      liquidCapital: 80000,
+      netWorth: 250000,
+      experience: 'Business experience helpful'
+    }
+  },
+  {
+    id: 'postnet-1',
+    name: 'PostNet Canada',
+    brand: 'PostNet',
+    industry: 'Business Services',
+    investmentMin: 150000,
+    investmentMax: 250000,
+    region: ['Ontario', 'Canada-Wide'],
+    description: 'Business services center offering printing, shipping, mailbox services, and graphic design solutions.',
+    image: 'https://images.pexels.com/photos/4386321/pexels-photo-4386321.jpeg',
+    businessModel: 'Retail Service Center',
+    supportProvided: ['Training', 'Marketing', 'Operations', 'Technology'],
+    franchiseFee: 39500,
+    royaltyFee: '5%',
+    territories: 700,
+    established: 1993,
+    website: 'https://www.postnet.ca/franchise/',
+    contactInfo: {
+      phone: '1-800-841-7171',
+      email: 'franchise@postnet.ca'
+    },
+    requirements: {
+      liquidCapital: 100000,
+      netWorth: 200000,
+      experience: 'Customer service experience preferred'
+    }
+  },
+  {
+    id: 'two-men-truck-1',
+    name: 'TWO MEN AND A TRUCK',
+    brand: 'TWO MEN AND A TRUCK',
+    industry: 'Business Services',
+    investmentMin: 158000,
+    investmentMax: 584000,
+    region: ['Ontario', 'Canada-Wide'],
+    description: 'North America\'s largest local moving franchise with comprehensive training and proven business systems.',
+    image: 'https://images.pexels.com/photos/7464230/pexels-photo-7464230.jpeg',
+    businessModel: 'Service-Based',
+    supportProvided: ['Training', 'Marketing', 'Operations', 'Technology'],
+    franchiseFee: 60000,
+    royaltyFee: '6%',
+    territories: 380,
+    established: 1985,
+    website: 'https://www.twomenandatruck.ca/franchise',
+    contactInfo: {
+      phone: '1-800-345-1070',
+      email: 'franchise@twomen.ca'
+    },
+    requirements: {
+      liquidCapital: 150000,
+      netWorth: 350000,
+      experience: 'Business or management experience preferred'
+    }
+  },
 
-const mockOpportunities: Opportunity[] = [
+  // RETAIL FRANCHISES
   {
-    id: '1',
-    title: 'Nicety Franchise',
-    image: 'https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg',
-    investment: '$10000.00 - $500000.00',
-    description: 'Nicety is a comprehensive business services franchise offering innovative solutions for modern entrepreneurs.',
-    postedDate: '21 September 2025',
-    partners: '1/5 partners',
-    type: 'franchise',
-    website: 'https://nicety.io/'
-  },
-  {
-    id: '2',
-    title: 'Reno Box - Business Opportunity',
-    image: 'https://images.pexels.com/photos/1267338/pexels-photo-1267338.jpeg',
-    investment: '$5000.00 - $100000.00',
-    description: 'Renobox is a trade mark specializing in the rental of containers, mobile warehouses, and exhibition...',
-    postedDate: '31 August 2025',
-    partners: '1/5 partners',
-    type: 'business',
-    website: 'https://www.canadafranchiseopportunities.ca/franchise/46-renobox-business-opportunity/'
-  },
-  {
-    id: '3',
-    title: 'MLS® C8765432 - Toronto Financial District Condo',
-    image: 'https://images.pexels.com/photos/280229/pexels-photo-280229.jpeg',
-    investment: '$589,900',
-    description: '1+1 Bed, 1 Bath | 650 sq ft | Built 2018 | $2,800/month rental potential\n\nPrime Financial District location at Bay & Adelaide. Modern amenities include 24hr concierge, gym, rooftop terrace. Walking distance to Union Station, PATH network. Current tenant paying $2,750/month (lease expires June 2025). Building amenities: Indoor pool, party room, guest suites. Maintenance: $485/month. Property taxes: $3,200/year.\n\nInvestment Analysis: 5.6% cap rate, excellent rental demand in core downtown.',
-    postedDate: '3 days ago',
-    partners: 'Seeking 2-3 investors',
-    type: 'real-estate',
-    website: 'https://www.realtor.ca/real-estate/27657832/1-bed-1-bath-condo-88-scott-st-toronto-church-yonge-corridor',
-    mlsNumber: 'C8765432',
-    propertyType: 'Condominium',
-    bedrooms: '1+1',
-    bathrooms: '1',
-    sqft: '650',
-    yearBuilt: '2018',
-    maintenance: '$485/month',
-    taxes: '$3,200/year',
-    rentalIncome: '$2,800/month potential'
-  },
-  {
-    id: '4',
-    title: 'MLS® W9876543 - Mississauga Fourplex Investment',
-    image: 'https://images.pexels.com/photos/1370704/pexels-photo-1370704.jpeg',
-    investment: '$1,349,000',
-    description: '4 Units | 3,200 total sq ft | Built 1985, renovated 2020 | $6,400/month gross rental income\n\nFully tenanted fourplex in desirable Cooksville area. Each unit: 2 bed, 1 bath, 800 sq ft. Recent upgrades: New roof (2021), updated electrical, refinished hardwood floors, stainless appliances. Separate utilities, individual parking spots.\n\nCurrent Rents: Unit 1: $1,650, Unit 2: $1,600, Unit 3: $1,575, Unit 4: $1,575. All tenants long-term (2+ years). Walking distance to Cooksville GO Station, Square One Mall.\n\nInvestment Analysis: 5.7% cap rate, $76,800 annual gross income, excellent cash flow property.',
-    postedDate: '1 week ago',
-    partners: 'Seeking 1-2 partners',
-    type: 'real-estate',
-    website: 'https://www.realtor.ca/real-estate/27654321/4-unit-investment-property-mississauga',
-    mlsNumber: 'W9876543',
-    propertyType: 'Multi-Family (4 units)',
-    bedrooms: '2 per unit',
-    bathrooms: '1 per unit',
-    sqft: '3,200 total',
-    yearBuilt: '1985',
-    maintenance: 'Owner managed',
-    taxes: '$8,900/year',
-    rentalIncome: '$6,400/month gross'
-  },
-  {
-    id: '5',
-    title: 'MLS® 1234567 - Ottawa Retail Plaza - Barrhaven',
-    image: 'https://images.pexels.com/photos/1546168/pexels-photo-1546168.jpeg',
-    investment: '$2,950,000',
-    description: '8 Retail Units | 12,500 sq ft total | Built 2008 | $22,400/month gross income\n\nHigh-traffic retail plaza in growing Barrhaven community. Anchor tenant: Metro grocery (5,000 sq ft, 10-year lease). Other tenants: Dental office, hair salon, restaurant, pharmacy, dry cleaner, insurance office, cell phone store.\n\nTenant Mix & Rents:\n• Metro Grocery: $8,500/month (expires 2032)\n• Dental Office: $3,200/month (expires 2027)\n• Restaurant: $4,100/month (expires 2026)\n• Other units: $1,100-$1,800/month\n\n150 parking spaces, excellent visibility from Strandherd Drive (25,000+ vehicles/day).\n\nInvestment Analysis: 9.1% cap rate, stable tenant mix, strong demographics.',
-    postedDate: '5 days ago',
-    partners: 'Seeking 3-4 investors',
-    type: 'real-estate',
-    website: 'https://www.loopnet.ca/listing/commercial-plaza-ottawa-on/12345678',
-    mlsNumber: '1234567',
-    propertyType: 'Retail Plaza',
-    bedrooms: 'N/A',
-    bathrooms: 'Multiple',
-    sqft: '12,500',
-    yearBuilt: '2008',
-    maintenance: 'Triple net leases',
-    taxes: '$35,000/year',
-    rentalIncome: '$22,400/month gross'
-  },
-  {
-    id: '6',
-    title: 'MLS® R2876543 - Vancouver East Development Site',
-    image: 'https://images.pexels.com/photos/1546166/pexels-photo-1546166.jpeg',
-    investment: '$1,988,000',
-    description: '33x122 ft lot | 4,026 sq ft | RT-2 Zoning | Duplex development approved\n\nRare development opportunity in desirable Renfrew-Collingwood area. Existing 1940s house (rentable during development process - currently $2,200/month). City-approved plans for modern duplex: two 1,800 sq ft units, each 3 bed/2.5 bath.\n\nDevelopment Details:\n• Building permits: Approved & paid ($45,000)\n• Architectural plans: Complete\n• Estimated construction cost: $650,000\n• Timeline: 12-14 months\n• Projected sale value: $1.4M per unit\n\nLocation: Walk score 89, near SkyTrain, excellent schools. Comparable duplex sales: $2.6-2.9M.\n\nInvestment Analysis: Projected 35% ROI over 18 months including land holding period.',
-    postedDate: '2 weeks ago',
-    partners: 'Seeking experienced developer partner',
-    type: 'real-estate',
-    website: 'https://www.rew.ca/properties/development-opportunity-vancouver-east',
-    mlsNumber: 'R2876543',
-    propertyType: 'Development Land',
-    bedrooms: 'Future: 3 per unit',
-    bathrooms: 'Future: 2.5 per unit',
-    sqft: '4,026 lot',
-    yearBuilt: '1940 (existing house)',
-    maintenance: 'N/A',
-    taxes: '$6,800/year',
-    rentalIncome: '$2,200/month (existing house)'
-  },
-  {
-    id: '7',
-    title: 'Calgary NW Rental Portfolio - 3 Properties',
-    image: 'https://images.pexels.com/photos/1546167/pexels-photo-1546167.jpeg',
-    investment: '$1,085,000',
-    description: '3 Single-Family Homes | Total 3,850 sq ft | $4,950/month gross rental income\n\nTurnkey rental portfolio in established NW Calgary neighborhoods. All properties professionally managed, excellent tenant history.\n\nProperty Details:\n\n1) Brentwood Bungalow (MLS® C4567890)\n• 3 bed, 2 bath, 1,200 sq ft, built 1978\n• Rent: $1,750/month, tenant 3 years\n• Recent: New furnace, updated kitchen\n• Purchase price: $385,000\n\n2) Hillhurst Townhouse (MLS® C4567891)\n• 3 bed, 2.5 bath, 1,350 sq ft, built 1985\n• Rent: $1,800/month, tenant 2 years\n• Attached garage, finished basement\n• Purchase price: $420,000\n\n3) Kensington Character Home (MLS® C4567892)\n• 2 bed, 1 bath, 1,300 sq ft, built 1965\n• Rent: $1,400/month, tenant 4 years\n• Hardwood floors, updated electrical\n• Purchase price: $280,000\n\nInvestment Analysis: 5.5% cap rate, $59,400 annual income, positive cash flow $850/month.',
-    postedDate: '10 days ago',
-    partners: 'Seeking 2-3 partners',
-    type: 'real-estate',
-    website: 'https://www.kijiji.ca/v-commercial-office-space/calgary/rental-property-portfolio/1234567890',
-    mlsNumber: 'Portfolio: C4567890-92',
-    propertyType: 'Rental Portfolio (3 homes)',
-    bedrooms: '2-3 per property',
-    bathrooms: '1-2.5 per property',
-    sqft: '3,850 total',
-    yearBuilt: '1965-1985',
-    maintenance: 'Professionally managed',
-    taxes: '$12,500/year total',
-    rentalIncome: '$4,950/month gross'
-  },
-  {
-    id: '8',
-    title: 'MLS® 28765432 - Montreal Student Housing Complex',
-    image: 'https://images.pexels.com/photos/1370705/pexels-photo-1370705.jpeg',
-    investment: '$825,000',
-    description: '12-Unit Student Housing | 6,000 sq ft | Built 1925, renovated 2019 | $9,600/month gross income\n\nPrime student rental property 3 blocks from McGill University campus. Fully renovated triplex conversion with modern amenities while maintaining heritage character.\n\nUnit Breakdown:\n• 8 bachelor units: $650/month each\n• 4 one-bedroom units: $900/month each\n• All units: Private bathroom, kitchenette, WiFi included\n• Common areas: Laundry room, study lounge, bike storage\n\nBuilding Features:\n• Heritage stone exterior, modern interior\n• Individual heating/cooling controls\n• Security system with key fob access\n• Professional property management in place\n\nLocation: Milton-Parc area, walk to McGill, Metro Sherbrooke, restaurants, cafes. 98% occupancy rate historically.\n\nInvestment Analysis: 11.7% cap rate, $115,200 annual income, strong student rental market.',
-    postedDate: '3 weeks ago',
-    partners: 'Seeking 1-2 partners',
-    type: 'real-estate',
-    website: 'https://www.centris.ca/en/properties/student-housing-montreal',
-    mlsNumber: '28765432',
-    propertyType: 'Multi-Unit Residential',
-    bedrooms: 'Bachelor & 1-bed units',
-    bathrooms: '1 per unit',
-    sqft: '6,000',
-    yearBuilt: '1925',
-    maintenance: 'Professionally managed',
-    taxes: '$8,200/year',
-    rentalIncome: '$9,600/month gross'
-  },
-  {
-    id: '9',
-    title: 'MLS® 202456789 - Halifax Waterfront Retail Space',
+    id: 'canadian-tire-1',
+    name: 'Canadian Tire Gas+',
+    brand: 'Canadian Tire',
+    industry: 'Retail',
+    investmentMin: 1500000,
+    investmentMax: 3000000,
+    region: ['Ontario', 'Canada-Wide'],
+    description: 'Iconic Canadian retail brand offering gas stations with convenience store operations and automotive services.',
     image: 'https://images.pexels.com/photos/4173624/pexels-photo-4173624.jpeg',
-    investment: '$1,525,000',
-    description: '2,800 sq ft Ground Floor Retail | Historic Properties District | $8,500/month rental income\n\nIconic waterfront commercial space in Halifax\'s premier tourist and business district. Ground floor of heritage building with 14-foot ceilings, exposed brick, large windows overlooking Halifax Harbour.\n\nSpace Details:\n• 2,800 sq ft main floor retail/restaurant space\n• 400 sq ft basement storage\n• Two street-facing entrances\n• Fully equipped commercial kitchen (if restaurant use)\n• Liquor license transferable\n• 6 parking spaces included (rare downtown)\n\nCurrent Tenant: Established seafood restaurant (8-year lease, 4 years remaining). Rent: $8,500/month triple net. Tenant responsible for utilities, maintenance, property taxes.\n\nLocation: Historic Properties, Harbourfront. 2M+ annual tourists, cruise ship terminal 200m, business district, convention center nearby.\n\nInvestment Analysis: 6.7% cap rate, stable long-term tenant, prime tourism location.',
-    postedDate: '1 month ago',
-    partners: 'Seeking 2-4 partners',
-    type: 'real-estate',
-    website: 'https://www.viewpoint.ca/map/halifax-waterfront-commercial',
-    mlsNumber: '202456789',
-    propertyType: 'Commercial Retail',
-    bedrooms: 'N/A',
-    bathrooms: '2 (public accessible)',
-    sqft: '2,800 + 400 basement',
-    yearBuilt: '1876',
-    maintenance: 'Triple net lease',
-    taxes: '$18,500/year',
-    rentalIncome: '$8,500/month'
+    businessModel: 'Retail Storefront',
+    supportProvided: ['Training', 'Marketing', 'Operations', 'Supply Chain'],
+    franchiseFee: 35000,
+    royaltyFee: '4%',
+    territories: 1700,
+    established: 1922,
+    website: 'https://www.canadiantire.ca/en/corporate/franchise.html',
+    contactInfo: {
+      phone: '1-800-387-8803',
+      email: 'franchise@canadiantire.ca'
+    },
+    requirements: {
+      liquidCapital: 1000000,
+      netWorth: 2500000,
+      experience: 'Retail management experience required'
+    }
+  },
+  {
+    id: 'circle-k-1',
+    name: 'Circle K Canada',
+    brand: 'Circle K',
+    industry: 'Retail',
+    investmentMin: 150000,
+    investmentMax: 1200000,
+    region: ['Ontario', 'Quebec', 'Canada-Wide'],
+    description: 'Global convenience store chain with fuel and food service operations across Canadian markets.',
+    image: 'https://images.pexels.com/photos/4386370/pexels-photo-4386370.jpeg',
+    businessModel: 'Convenience Store',
+    supportProvided: ['Training', 'Marketing', 'Operations', 'Supply Chain'],
+    franchiseFee: 25000,
+    royaltyFee: '4.5%',
+    territories: 2100,
+    established: 1951,
+    website: 'https://www.circlek.com/franchise',
+    contactInfo: {
+      phone: '1-800-361-2612',
+      email: 'franchise@circlek.ca'
+    },
+    requirements: {
+      liquidCapital: 200000,
+      netWorth: 500000,
+      experience: 'Retail or business experience preferred'
+    }
+  },
+  {
+    id: 'shoppers-drug-mart-1',
+    name: 'Shoppers Drug Mart',
+    brand: 'Shoppers Drug Mart',
+    industry: 'Retail',
+    investmentMin: 500000,
+    investmentMax: 1500000,
+    region: ['Ontario', 'Canada-Wide'],
+    description: 'Canada\'s leading pharmacy chain with health, beauty, and convenience products serving communities nationwide.',
+    image: 'https://images.pexels.com/photos/4386431/pexels-photo-4386431.jpeg',
+    businessModel: 'Pharmacy Retail',
+    supportProvided: ['Training', 'Marketing', 'Operations', 'Pharmacy Support'],
+    franchiseFee: 75000,
+    royaltyFee: '7%',
+    territories: 1300,
+    established: 1962,
+    website: 'https://www.shoppersdrugmart.ca/en/franchise',
+    contactInfo: {
+      phone: '1-800-746-7737',
+      email: 'franchise@shoppersdrugmart.ca'
+    },
+    requirements: {
+      liquidCapital: 400000,
+      netWorth: 1000000,
+      experience: 'Pharmacy license and retail experience required'
+    }
+  },
+  {
+    id: 'dollarama-1',
+    name: 'Dollarama',
+    brand: 'Dollarama',
+    industry: 'Retail',
+    investmentMin: 75000,
+    investmentMax: 150000,
+    region: ['Ontario', 'Quebec', 'Canada-Wide'],
+    description: 'Canada\'s leading dollar store chain offering everyday consumer products at compelling values.',
+    image: 'https://images.pexels.com/photos/3962285/pexels-photo-3962285.jpeg',
+    businessModel: 'Retail Storefront',
+    supportProvided: ['Training', 'Marketing', 'Operations', 'Merchandising'],
+    franchiseFee: 25000,
+    royaltyFee: '5%',
+    territories: 1400,
+    established: 1992,
+    website: 'https://www.dollarama.com/en-CA/franchise',
+    contactInfo: {
+      phone: '1-514-737-1006',
+      email: 'franchise@dollarama.com'
+    },
+    requirements: {
+      liquidCapital: 100000,
+      netWorth: 200000,
+      experience: 'Retail experience preferred'
+    }
+  },
+  {
+    id: 'sport-chek-1',
+    name: 'Sport Chek',
+    brand: 'Sport Chek',
+    industry: 'Retail',
+    investmentMin: 300000,
+    investmentMax: 800000,
+    region: ['Ontario', 'Canada-Wide'],
+    description: 'Canada\'s largest sporting goods retailer offering athletic footwear, apparel, and equipment.',
+    image: 'https://images.pexels.com/photos/1552617/pexels-photo-1552617.jpeg',
+    businessModel: 'Retail Storefront',
+    supportProvided: ['Training', 'Marketing', 'Operations', 'Merchandising'],
+    franchiseFee: 50000,
+    royaltyFee: '6%',
+    territories: 200,
+    established: 1901,
+    website: 'https://www.sportchek.ca/franchise',
+    contactInfo: {
+      phone: '1-800-665-6065',
+      email: 'franchise@sportchek.ca'
+    },
+    requirements: {
+      liquidCapital: 250000,
+      netWorth: 500000,
+      experience: 'Retail or sports industry experience preferred'
+    }
+  },
+
+  // EDUCATION FRANCHISES
+  {
+    id: 'kumon-1',
+    name: 'Kumon Math and Reading Centers',
+    brand: 'Kumon',
+    industry: 'Education',
+    investmentMin: 70000,
+    investmentMax: 140000,
+    region: ['Ontario', 'Canada-Wide'],
+    description: 'World\'s largest after-school math and reading program with proven curriculum and strong community presence.',
+    image: 'https://images.pexels.com/photos/8613089/pexels-photo-8613089.jpeg',
+    businessModel: 'Education Center',
+    supportProvided: ['Training', 'Curriculum', 'Marketing', 'Operations'],
+    franchiseFee: 1000,
+    royaltyFee: '30-33%',
+    territories: 1500,
+    established: 1958,
+    website: 'https://www.kumon.ca/franchise/',
+    contactInfo: {
+      phone: '1-866-633-0740',
+      email: 'franchise@kumon.ca'
+    },
+    requirements: {
+      liquidCapital: 70000,
+      netWorth: 150000,
+      experience: 'Education background helpful'
+    }
+  },
+  {
+    id: 'sylvan-learning-1',
+    name: 'Sylvan Learning',
+    brand: 'Sylvan Learning',
+    industry: 'Education',
+    investmentMin: 179000,
+    investmentMax: 305000,
+    region: ['Ontario', 'Canada-Wide'],
+    description: 'Personalized tutoring and test prep services helping students achieve academic success across Canada.',
+    image: 'https://images.pexels.com/photos/8613200/pexels-photo-8613200.jpeg',
+    businessModel: 'Education Center',
+    supportProvided: ['Training', 'Curriculum', 'Marketing', 'Technology'],
+    franchiseFee: 48000,
+    royaltyFee: '8-9%',
+    territories: 750,
+    established: 1979,
+    website: 'https://www.sylvanlearning.com/franchise',
+    contactInfo: {
+      phone: '1-800-284-8214',
+      email: 'franchise@sylvan.com'
+    },
+    requirements: {
+      liquidCapital: 125000,
+      netWorth: 250000,
+      experience: 'Education or business background preferred'
+    }
+  },
+  {
+    id: 'mathnasium-1',
+    name: 'Mathnasium Learning Centers',
+    brand: 'Mathnasium',
+    industry: 'Education',
+    investmentMin: 120000,
+    investmentMax: 180000,
+    region: ['Ontario', 'Canada-Wide'],
+    description: 'Math-only learning center franchise using the proven Mathnasium Method to build math skills and confidence.',
+    image: 'https://images.pexels.com/photos/8613097/pexels-photo-8613097.jpeg',
+    businessModel: 'Education Center',
+    supportProvided: ['Training', 'Curriculum', 'Marketing', 'Operations'],
+    franchiseFee: 49000,
+    royaltyFee: '10%',
+    territories: 1000,
+    established: 2002,
+    website: 'https://www.mathnasium.ca/franchise',
+    contactInfo: {
+      phone: '1-877-601-6284',
+      email: 'franchise@mathnasium.com'
+    },
+    requirements: {
+      liquidCapital: 100000,
+      netWorth: 200000,
+      experience: 'Education or business experience helpful'
+    }
+  },
+  {
+    id: 'oxford-learning-1',
+    name: 'Oxford Learning',
+    brand: 'Oxford Learning',
+    industry: 'Education',
+    investmentMin: 125000,
+    investmentMax: 200000,
+    region: ['Ontario', 'Canada-Wide'],
+    description: 'Canadian-founded tutoring and educational services franchise helping students of all ages achieve academic success.',
+    image: 'https://images.pexels.com/photos/8613092/pexels-photo-8613092.jpeg',
+    businessModel: 'Education Center',
+    supportProvided: ['Training', 'Curriculum', 'Marketing', 'Operations'],
+    franchiseFee: 45000,
+    royaltyFee: '8%',
+    territories: 100,
+    established: 1984,
+    website: 'https://www.oxfordlearning.com/franchise/',
+    contactInfo: {
+      phone: '1-888-559-2212',
+      email: 'franchise@oxfordlearning.com'
+    },
+    requirements: {
+      liquidCapital: 100000,
+      netWorth: 200000,
+      experience: 'Education or business background preferred'
+    }
+  },
+  {
+    id: 'huntington-learning-1',
+    name: 'Huntington Learning Centre',
+    brand: 'Huntington Learning',
+    industry: 'Education',
+    investmentMin: 150000,
+    investmentMax: 250000,
+    region: ['Ontario', 'Canada-Wide'],
+    description: 'Personalized tutoring and test prep franchise helping students improve grades and test scores.',
+    image: 'https://images.pexels.com/photos/8613201/pexels-photo-8613201.jpeg',
+    businessModel: 'Education Center',
+    supportProvided: ['Training', 'Curriculum', 'Marketing', 'Technology'],
+    franchiseFee: 49000,
+    royaltyFee: '8%',
+    territories: 300,
+    established: 1977,
+    website: 'https://www.huntingtonhelps.ca/franchise',
+    contactInfo: {
+      phone: '1-800-226-5327',
+      email: 'franchise@huntingtonhelps.ca'
+    },
+    requirements: {
+      liquidCapital: 125000,
+      netWorth: 250000,
+      experience: 'Education or business experience helpful'
+    }
+  },
+
+  // REAL ESTATE FRANCHISES
+  {
+    id: 'remax-1',
+    name: 'RE/MAX',
+    brand: 'RE/MAX',
+    industry: 'Real Estate',
+    investmentMin: 25000,
+    investmentMax: 200000,
+    region: ['Ontario', 'Canada-Wide'],
+    description: 'World\'s most productive real estate network with proven systems and global brand recognition.',
+    image: 'https://images.pexels.com/photos/280229/pexels-photo-280229.jpeg',
+    businessModel: 'Real Estate Brokerage',
+    supportProvided: ['Training', 'Marketing', 'Technology', 'Lead Generation'],
+    franchiseFee: 25000,
+    royaltyFee: 'Variable',
+    territories: 4000,
+    established: 1973,
+    website: 'https://www.remax.ca/franchise/',
+    contactInfo: {
+      phone: '1-800-263-2381',
+      email: 'franchise@remax.ca'
+    },
+    requirements: {
+      liquidCapital: 50000,
+      netWorth: 100000,
+      experience: 'Real estate license required'
+    }
+  },
+  {
+    id: 'century21-1',
+    name: 'Century 21 Canada',
+    brand: 'Century 21',
+    industry: 'Real Estate',
+    investmentMin: 35000,
+    investmentMax: 150000,
+    region: ['Ontario', 'Canada-Wide'],
+    description: 'Global real estate franchise with comprehensive training and marketing support systems for Canadian markets.',
+    image: 'https://images.pexels.com/photos/1546168/pexels-photo-1546168.jpeg',
+    businessModel: 'Real Estate Brokerage',
+    supportProvided: ['Training', 'Marketing', 'Technology', 'Brand Recognition'],
+    franchiseFee: 25000,
+    royaltyFee: '6%',
+    territories: 3000,
+    established: 1971,
+    website: 'https://www.century21.ca/franchise/',
+    contactInfo: {
+      phone: '1-877-221-2765',
+      email: 'franchise@century21.ca'
+    },
+    requirements: {
+      liquidCapital: 75000,
+      netWorth: 150000,
+      experience: 'Real estate license and experience required'
+    }
+  },
+  {
+    id: 'royal-lepage-1',
+    name: 'Royal LePage',
+    brand: 'Royal LePage',
+    industry: 'Real Estate',
+    investmentMin: 50000,
+    investmentMax: 250000,
+    region: ['Ontario', 'Canada-Wide'],
+    description: 'Canada\'s leading provider of services to real estate brokerages and their agents since 1913.',
+    image: 'https://images.pexels.com/photos/1370704/pexels-photo-1370704.jpeg',
+    businessModel: 'Real Estate Brokerage',
+    supportProvided: ['Training', 'Marketing', 'Technology', 'Business Development'],
+    franchiseFee: 35000,
+    royaltyFee: '6%',
+    territories: 600,
+    established: 1913,
+    website: 'https://www.royallepage.ca/en/franchise/',
+    contactInfo: {
+      phone: '1-800-267-2735',
+      email: 'franchise@royallepage.ca'
+    },
+    requirements: {
+      liquidCapital: 100000,
+      netWorth: 200000,
+      experience: 'Real estate brokerage experience required'
+    }
+  },
+  {
+    id: 'coldwell-banker-1',
+    name: 'Coldwell Banker Canada',
+    brand: 'Coldwell Banker',
+    industry: 'Real Estate',
+    investmentMin: 40000,
+    investmentMax: 180000,
+    region: ['Ontario', 'Canada-Wide'],
+    description: 'Premium real estate franchise brand with luxury market focus and comprehensive agent support systems.',
+    image: 'https://images.pexels.com/photos/1546166/pexels-photo-1546166.jpeg',
+    businessModel: 'Real Estate Brokerage',
+    supportProvided: ['Training', 'Marketing', 'Technology', 'Luxury Services'],
+    franchiseFee: 30000,
+    royaltyFee: '6%',
+    territories: 3000,
+    established: 1906,
+    website: 'https://www.coldwellbanker.ca/franchise',
+    contactInfo: {
+      phone: '1-800-765-7653',
+      email: 'franchise@coldwellbanker.ca'
+    },
+    requirements: {
+      liquidCapital: 80000,
+      netWorth: 175000,
+      experience: 'Real estate license and brokerage experience required'
+    }
+  },
+  {
+    id: 'keller-williams-1',
+    name: 'Keller Williams Canada',
+    brand: 'Keller Williams',
+    industry: 'Real Estate',
+    investmentMin: 45000,
+    investmentMax: 200000,
+    region: ['Ontario', 'Canada-Wide'],
+    description: 'World\'s largest real estate franchise by agent count with innovative training and technology platforms.',
+    image: 'https://images.pexels.com/photos/1546167/pexels-photo-1546167.jpeg',
+    businessModel: 'Real Estate Brokerage',
+    supportProvided: ['Training', 'Technology', 'Coaching', 'Lead Generation'],
+    franchiseFee: 35000,
+    royaltyFee: '6%',
+    territories: 1000,
+    established: 1983,
+    website: 'https://www.kw.ca/franchise',
+    contactInfo: {
+      phone: '1-800-596-2875',
+      email: 'franchise@kw.ca'
+    },
+    requirements: {
+      liquidCapital: 85000,
+      netWorth: 200000,
+      experience: 'Real estate license and business experience required'
+    }
   }
 ];
 
-export const BusinessOpportunities: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All Categories');
-  const [showQuizModal, setShowQuizModal] = useState(false);
-  const [opportunities, setOpportunities] = useState<Opportunity[]>(mockOpportunities);
-  const [showFranchiseResults, setShowFranchiseResults] = useState(false);
-  const [selectedOpportunity, setSelectedOpportunity] = useState<Opportunity | null>(null);
-  const [showSubmissionForm, setShowSubmissionForm] = useState(false);
-  const [showAdminDashboard, setShowAdminDashboard] = useState(false);
-  const [pendingFranchises, setPendingFranchises] = useState<PendingFranchise[]>([]);
-
-  const categories = [
-    'All Categories',
-    'Franchises',
-    'Business Opportunities',
-    'Real Estate',
-    'Food & Beverage',
-    'Business Services',
-    'Education',
-    'Retail',
-    'Real Estate'
-  ];
-
-  const handleQuizComplete = (matches: any[]) => {
-    console.log('=== HANDLING QUIZ COMPLETION ===');
-    console.log('Received matches:', matches.length);
-    if (matches && matches.length > 0) {
-      console.log('Match details:', matches.map(m => `${m.name} - ${m.industry}`));
+// Add the specific franchises requested
+const specificFranchises: Franchise[] = [
+  {
+    id: 'nicety-franchise',
+    name: 'Nicety Franchise',
+    brand: 'Nicety',
+    industry: 'Business Services',
+    investmentMin: 10000,
+    investmentMax: 500000,
+    region: ['Ontario', 'Canada-Wide'],
+    description: 'Nicety is a comprehensive business services franchise offering innovative solutions for modern entrepreneurs. Join our growing network of successful franchise partners.',
+    image: 'https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg',
+    businessModel: 'Service-Based',
+    supportProvided: ['Training', 'Marketing', 'Operations', 'Technology'],
+    franchiseFee: 25000,
+    royaltyFee: '5%',
+    territories: 50,
+    established: 2020,
+    website: 'https://nicety.io/',
+    contactInfo: {
+      phone: '1-800-NICETY-1',
+      email: 'franchise@nicety.io'
+    },
+    requirements: {
+      liquidCapital: 50000,
+      netWorth: 100000,
+      experience: 'Business experience helpful'
     }
-    
-    if (matches && matches.length > 0) {
-      // Convert franchise matches to opportunity format with real data
-      const formatCurrency = (min: number, max: number) => {
-        const formatNumber = (num: number) => {
-          if (num >= 1000000) return `$${(num / 1000000).toFixed(1)}M`;
-          if (num >= 1000) return `$${(num / 1000).toFixed(0)}K`;
-          return `$${num.toLocaleString()}`;
-        };
-        return `${formatNumber(min)} - ${formatNumber(max)}`;
-      };
-
-      const franchiseOpportunities = matches.map((franchise) => {
-        return {
-          id: `franchise-${franchise.id}`,
-          title: franchise.name || franchise.brand,
-          image: franchise.image || 'https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg',
-          investment: franchise.investmentMin && franchise.investmentMax 
-            ? formatCurrency(franchise.investmentMin, franchise.investmentMax)
-            : franchise.investment || 'Contact for Details',
-          description: franchise.description || 'Franchise opportunity available',
-          postedDate: 'Available Now',
-          partners: `${franchise.matchScore || 85}% Match`,
-          type: 'franchise' as const,
-          website: franchise.website
-        };
-      });
-
-      setOpportunities(franchiseOpportunities);
-      setSelectedCategory('Franchises');
-    } else {
-      // Fallback: show all available opportunities if no matches
-      setOpportunities(mockOpportunities);
+  },
+  {
+    id: 'renobox-franchise',
+    name: 'Renobox - Business Opportunity',
+    brand: 'Renobox',
+    industry: 'Business Services',
+    investmentMin: 5000,
+    investmentMax: 100000,
+    region: ['Ontario', 'Quebec', 'Canada-Wide'],
+    description: 'Renobox is a trade mark specializing in the rental of containers, mobile warehouses, and exhibition kiosks. Whether for your entrepreneurial or personal needs, we will find a product for you! When you choose to go into business with the Renobox opportunity, you will benefit from full start-up support as well as in the continuity of your business in light transportation according to the needs of the operator: - Market study and business plan - Funding support - Advertising program - Corporate identity: logos, lettering, business cards, promotional brochures, etc. - Comprehensive operational start-up and maintenance training',
+    image: 'https://images.pexels.com/photos/1267338/pexels-photo-1267338.jpeg',
+    businessModel: 'Equipment Rental',
+    supportProvided: ['Market Study', 'Business Plan', 'Funding Support', 'Advertising Program', 'Corporate Identity', 'Training'],
+    franchiseFee: 15000,
+    royaltyFee: '6%',
+    territories: 25,
+    established: 2015,
+    website: 'https://www.canadafranchiseopportunities.ca/franchise/46-renobox-business-opportunity/',
+    contactInfo: {
+      phone: '1-800-RENOBOX',
+      email: 'franchise@renobox.ca'
+    },
+    requirements: {
+      liquidCapital: 25000,
+      netWorth: 75000,
+      experience: 'Transportation or rental experience preferred'
     }
-    
-    setShowQuizModal(false);
-    setSelectedCategory('All Categories');
-  };
-
-  const handleClearFilters = () => {
-    setSearchTerm('');
-    setSelectedCategory('All Categories');
-    setOpportunities(mockOpportunities);
-  };
-
-  const handleFranchiseSubmission = (submissionData: any) => {
-    const newFranchise: PendingFranchise = {
-      ...submissionData,
-      status: 'pending' as const
-    };
-    
-    setPendingFranchises(prev => [...prev, newFranchise]);
-    setShowSubmissionForm(false);
-    
-    // Show success message (you could add a toast notification here)
-    alert('Franchise submission received! We\'ll review it within 24-48 hours.');
-  };
-
-  const handleApproveFranchise = (id: string) => {
-    setPendingFranchises(prev => 
-      prev.map(franchise => 
-        franchise.id === id 
-          ? { ...franchise, status: 'approved' as const }
-          : franchise
-      )
-    );
-    
-    // Add to main opportunities list
-    const approvedFranchise = pendingFranchises.find(f => f.id === id);
-    if (approvedFranchise) {
-      const newOpportunity: Opportunity = {
-        id: approvedFranchise.id,
-        title: approvedFranchise.franchiseName,
-        image: approvedFranchise.image || 'https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg',
-        investment: `$${parseInt(approvedFranchise.investmentMin).toLocaleString()} - $${parseInt(approvedFranchise.investmentMax).toLocaleString()}`,
-        description: approvedFranchise.description,
-        postedDate: 'Available Now',
-        partners: approvedFranchise.listingType === 'featured' ? '⭐ Featured' : 'Standard Listing',
-        type: 'franchise',
-        website: approvedFranchise.website
-      };
-      
-      setOpportunities(prev => {
-        // If featured, add to beginning; otherwise add to end
-        if (approvedFranchise.listingType === 'featured') {
-          return [newOpportunity, ...prev];
-        } else {
-          return [...prev, newOpportunity];
-        }
-      });
-    }
-  };
-
-  const handleRejectFranchise = (id: string) => {
-    setPendingFranchises(prev => 
-      prev.map(franchise => 
-        franchise.id === id 
-          ? { ...franchise, status: 'rejected' as const }
-          : franchise
-      )
-    );
-  };
-
-  const filteredOpportunities = opportunities.filter(opp => {
-    const matchesSearch = opp.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         opp.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         opp.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         opp.investment.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'All Categories' || 
-                           (selectedCategory === 'Franchises' && opp.type === 'franchise') ||
-                           (selectedCategory === 'Business Opportunities' && opp.type === 'business') ||
-                           (selectedCategory === 'Real Estate' && opp.type === 'real-estate') ||
-                           (selectedCategory === 'Food & Beverage' && opp.title.toLowerCase().includes('food')) ||
-                           (selectedCategory === 'Business Services' && (opp.type === 'franchise' || opp.type === 'business')) ||
-                           (selectedCategory === 'Education' && opp.title.toLowerCase().includes('education')) ||
-                           (selectedCategory === 'Retail' && opp.title.toLowerCase().includes('retail'));
-    return matchesSearch && matchesCategory;
-  });
-
-  // Sort opportunities to show featured first
-  const sortedOpportunities = filteredOpportunities.sort((a, b) => {
-    const aFeatured = a.partners.includes('⭐');
-    const bFeatured = b.partners.includes('⭐');
-    if (aFeatured && !bFeatured) return -1;
-    if (!aFeatured && bFeatured) return 1;
-    return 0;
-  });
-
-  if (showAdminDashboard) {
-    return (
-      <AdminDashboard
-        onBack={() => setShowAdminDashboard(false)}
-        pendingFranchises={pendingFranchises}
-        onApprove={handleApproveFranchise}
-        onReject={handleRejectFranchise}
-      />
-    );
   }
+];
 
-  return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
-      <div className="w-64 bg-white shadow-sm border-r border-gray-200">
-        <div className="p-6">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">B</span>
-            </div>
-            <span className="text-xl font-semibold text-gray-900">Buyers' Alike</span>
-          </div>
+// Combine all franchises
+export const allCanadianFranchises: Franchise[] = [
+  ...canadianFranchises,
+  ...specificFranchises
+];
 
-          <nav className="space-y-2">
-            <div className="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg cursor-pointer">
-              <Users className="w-5 h-5" />
-              <span>Partnerships</span>
-            </div>
-            <div className="flex items-center gap-3 px-3 py-2 bg-yellow-50 text-yellow-700 rounded-lg">
-              <FileText className="w-5 h-5" />
-              <span>Opportunities</span>
-            </div>
-            <div className="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg cursor-pointer">
-              <MessageSquare className="w-5 h-5" />
-              <span>Messaging</span>
-            </div>
-            <div className="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg cursor-pointer">
-              <MessageSquare className="w-5 h-5" />
-              <span>Forum</span>
-            </div>
-            <div className="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg cursor-pointer">
-              <FileText className="w-5 h-5" />
-              <span>News</span>
-            </div>
-          </nav>
-        </div>
 
-        <div className="absolute bottom-0 left-0 right-0 w-64 p-6 border-t border-gray-200">
-          <div className="space-y-2">
-            <div className="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg cursor-pointer">
-              <User className="w-5 h-5" />
-              <span>Profile</span>
-            </div>
-            <div className="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg cursor-pointer">
-              <Settings className="w-5 h-5" />
-              <span>Settings</span>
-            </div>
-            <div 
-              className="flex items-center gap-3 px-3 py-2 text-blue-600 hover:bg-blue-50 rounded-lg cursor-pointer"
-              onClick={() => setShowAdminDashboard(true)}
-            >
-              <Shield className="w-5 h-5" />
-              <span>Admin</span>
-              {pendingFranchises.filter(f => f.status === 'pending').length > 0 && (
-                <span className="bg-red-500 text-white text-xs rounded-full px-2 py-0.5 ml-auto">
-                  {pendingFranchises.filter(f => f.status === 'pending').length}
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-3 px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg cursor-pointer">
-              <LogOut className="w-5 h-5" />
-              <span>Sign Out</span>
-            </div>
-          </div>
-        </div>
-      </div>
+export const getMatchingFranchises = (criteria: any): Franchise[] => {
+  console.log('Getting matching franchises for criteria:', criteria);
+  let matches = [...allCanadianFranchises];
+  console.log('Total franchises available:', matches.length);
+  
+  // Filter by industry
+  if (criteria.industry && criteria.industry !== 'Any Industry') {
+    console.log('Filtering by industry:', criteria.industry);
+    const beforeFilter = matches.length;
+    matches = matches.filter(franchise => {
+      const match = franchise.industry === criteria.industry || 
+                   franchise.industry.toLowerCase().includes(criteria.industry.toLowerCase());
+      return match;
+    });
+    console.log(`After industry filter: ${beforeFilter} -> ${matches.length}`);
+  }
+  
+  // Filter by investment range
+  if (criteria.investmentRange) {
+    console.log('Filtering by investment:', criteria.investmentRange);
+    const [min, max] = getInvestmentRange(criteria.investmentRange);
+    const beforeFilter = matches.length;
+    matches = matches.filter(franchise => 
+      franchise.investmentMax >= min && franchise.investmentMin <= max
+    );
+    console.log(`After investment filter: ${beforeFilter} -> ${matches.length}`);
+  }
+  
+  // Filter by region (Ontario prioritized)
+  if (criteria.region && criteria.region !== 'Canada-Wide') {
+    const beforeFilter = matches.length;
+    matches = matches.filter(franchise => 
+      franchise.region.includes(criteria.region) || franchise.region.includes('Canada-Wide')
+    );
+    console.log(`After region filter: ${beforeFilter} -> ${matches.length}`);
+  }
+  
+  // Filter by lifestyle/business model
+  if (criteria.lifestyle) {
+    console.log('Filtering by lifestyle:', criteria.lifestyle);
+    const beforeFilter = matches.length;
+    matches = matches.filter(franchise => {
+      const businessModel = franchise.businessModel.toLowerCase();
+      let match = false;
+      switch (criteria.lifestyle) {
+        case 'Work from Home':
+          match = businessModel.includes('service') || 
+                  businessModel.includes('mobile') ||
+                  businessModel.includes('home') ||
+                  businessModel.includes('education') ||
+                  franchise.industry === 'Business Services' ||
+                  franchise.industry === 'Education';
+          break;
+        case 'Retail Storefront':
+          match = businessModel.includes('retail') || 
+                  businessModel.includes('restaurant') ||
+                  businessModel.includes('store') ||
+                  businessModel.includes('center');
+          break;
+        case 'Service-Based':
+          match = businessModel.includes('service');
+          break;
+        case 'B2B Operations':
+          match = businessModel.includes('b2b') ||
+                  franchise.industry.includes('Business Services');
+          break;
+        default:
+          match = true;
+      }
+      return match;
+    });
+    console.log(`After lifestyle filter: ${beforeFilter} -> ${matches.length}`);
+  }
+  
+  // If no matches found, return some relevant alternatives
+  if (matches.length === 0) {
+    console.log('No exact matches found, providing relevant alternatives');
+    
+    // For Education, return all education franchises regardless of other criteria
+    if (criteria.industry === 'Education') {
+      matches = allCanadianFranchises.filter(f => f.industry === 'Education');
+    }
+    // For Business Services, return business service franchises
+    else if (criteria.industry === 'Business Services') {
+      matches = allCanadianFranchises.filter(f => f.industry === 'Business Services');
+      console.log('Returning all Business Services franchises:', matches.length);
+    }
+    // Otherwise return some popular franchises
+    else {
+      matches = allCanadianFranchises.slice(0, 3);
+      console.log('Returning popular franchises as fallback:', matches.length);
+    }
+  }
+  
+  // Calculate match scores
+  matches = matches.map(franchise => ({
+    ...franchise,
+    matchScore: calculateMatchScore(franchise, criteria)
+  }));
+  
+  // Sort by match score and prioritize Ontario
+  matches.sort((a, b) => {
+    // First sort by Ontario preference
+    const aOntario = a.region.includes('Ontario') ? 1 : 0;
+    const bOntario = b.region.includes('Ontario') ? 1 : 0;
+    
+    if (criteria.region === 'Ontario' && aOntario !== bOntario) {
+      return bOntario - aOntario;
+    }
+    
+    // Then by match score
+    return (b.matchScore || 0) - (a.matchScore || 0);
+  });
+  
+  const finalMatches = matches.slice(0, 6); // Return top 6 matches
+  console.log('Final matches to return:', finalMatches.length);
+  return finalMatches;
+};
 
-      {/* Main Content */}
-      <div className="flex-1 overflow-auto">
-        <div className="p-8">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Business Opportunities</h1>
-              <p className="text-gray-600 mt-1">
-                {sortedOpportunities.length} opportunities available
-                {sortedOpportunities.filter(o => o.partners.includes('⭐')).length > 0 && (
-                  <span className="ml-2 text-yellow-600 font-medium">
-                    • {sortedOpportunities.filter(o => o.partners.includes('⭐')).length} featured
-                  </span>
-                )}
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <button 
-                onClick={() => setShowSubmissionForm(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg font-medium hover:shadow-lg transition-all duration-200 transform hover:scale-105"
-              >
-                <Plus className="w-4 h-4" />
-                Submit Franchise
-              </button>
-              <button className="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm hover:bg-gray-200 transition-colors">
-                Saved to this PC
-              </button>
-            </div>
-          </div>
+const getInvestmentRange = (range: string): [number, number] => {
+  switch (range) {
+    case '$5k - $25k': return [5000, 25000];
+    case '$25k - $100k': return [25000, 100000];
+    case '$100k+': return [100000, 10000000];
+    default: return [0, 10000000];
+  }
+};
 
-          {/* Search and Filters */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <input
-                    type="text"
-                    placeholder="Search by title or description..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
+const getInvestmentMin = (range: string): number => {
+  return getInvestmentRange(range)[0];
+};
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
-                <div className="relative">
-                  <select
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="w-full px-4 py-3 border-2 border-yellow-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent appearance-none bg-white"
-                  >
-                    {categories.map(category => (
-                      <option key={category} value={category}>{category}</option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
-                </div>
-              </div>
+const getInvestmentMax = (range: string): number => {
+  return getInvestmentRange(range)[1];
+};
 
-              <div className="flex items-end gap-3">
-                <button
-                  onClick={handleClearFilters}
-                  className="px-6 py-3 text-gray-600 hover:text-gray-900 font-medium transition-colors"
-                >
-                  Clear Filters
-                </button>
-                <button
-                  onClick={() => setShowQuizModal(true)}
-                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-medium hover:shadow-lg transition-all duration-200 transform hover:scale-105"
-                >
-                  🎯 Find My Match
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Results Header */}
-          {/* Opportunities Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {sortedOpportunities.map((opportunity) => (
-              <OpportunityCard 
-                key={opportunity.id} 
-                opportunity={opportunity}
-                onLearnMore={() => setSelectedOpportunity(opportunity)}
-              />
-            ))}
-          </div>
-
-          {/* Empty State */}
-          {sortedOpportunities.length === 0 && (
-            <div className="text-center py-12">
-              <div className="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-                <Search className="w-8 h-8 text-gray-400" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No opportunities found</h3>
-              <p className="text-gray-600 mb-4">Try adjusting your search terms or filters</p>
-              <button
-                onClick={() => setShowQuizModal(true)}
-                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-medium hover:shadow-lg transition-all duration-200 transform hover:scale-105"
-              >
-                🚀 Take Franchise Quiz
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Quiz Modal */}
-      {showQuizModal && (
-        <FranchiseQuizModal
-          onClose={() => setShowQuizModal(false)}
-          onComplete={handleQuizComplete}
-        />
-      )}
-
-      {/* Franchise Submission Form */}
-      {showSubmissionForm && (
-        <FranchiseSubmissionForm
-          onClose={() => setShowSubmissionForm(false)}
-          onSubmit={handleFranchiseSubmission}
-        />
-      )}
-
-      {/* Franchise Detail Modal */}
-      {selectedOpportunity && (
-        <FranchiseDetailModal
-          opportunity={selectedOpportunity}
-          onClose={() => setSelectedOpportunity(null)}
-          onPartner={() => {
-            // Handle partner action
-            console.log('Partner with:', selectedOpportunity.title);
-            setSelectedOpportunity(null);
-          }}
-        />
-      )}
-    </div>
-  );
+const calculateMatchScore = (franchise: Franchise, criteria: any): number => {
+  let score = 0;
+  
+  // Industry match (40% weight)
+  if (criteria.industry && criteria.industry !== 'Any Industry') {
+    if (franchise.industry.toLowerCase().includes(criteria.industry.toLowerCase())) {
+      score += 40;
+    }
+  } else {
+    score += 20; // Partial score for "Any Industry"
+  }
+  
+  // Investment range match (30% weight)
+  if (criteria.investmentRange) {
+    const [min, max] = getInvestmentRange(criteria.investmentRange);
+    if (franchise.investmentMin <= max && franchise.investmentMax >= min) {
+      score += 30;
+    }
+  }
+  
+  // Region match (20% weight, Ontario gets bonus)
+  if (criteria.region) {
+    if (franchise.region.includes(criteria.region)) {
+      score += 20;
+      // Ontario bonus
+      if (criteria.region === 'Ontario' && franchise.region.includes('Ontario')) {
+        score += 5;
+      }
+    } else if (franchise.region.includes('Canada-Wide')) {
+      score += 15;
+    }
+  }
+  
+  // Lifestyle match (10% weight)
+  if (criteria.lifestyle) {
+    let lifestyleMatch = false;
+    switch (criteria.lifestyle) {
+      case 'Work from Home':
+        lifestyleMatch = franchise.businessModel.includes('Service-Based') || 
+                        franchise.businessModel.includes('Mobile');
+        break;
+      case 'Retail Storefront':
+        lifestyleMatch = franchise.businessModel.includes('Retail') || 
+                        franchise.businessModel.includes('Restaurant') ||
+                        franchise.businessModel.includes('Store');
+        break;
+      case 'Service-Based':
+        lifestyleMatch = franchise.businessModel.includes('Service');
+        break;
+      case 'B2B Operations':
+        lifestyleMatch = franchise.businessModel.includes('B2B') ||
+                        franchise.industry.includes('Business Services');
+        break;
+    }
+    if (lifestyleMatch) score += 10;
+  }
+  
+  return Math.min(score, 100); // Cap at 100%
 };

@@ -784,15 +784,14 @@ export const getMatchingFranchises = (criteria: any): Franchise[] => {
   console.log('Getting matching franchises for criteria:', criteria);
   let matches = [...allCanadianFranchises];
   console.log('Total franchises available:', matches.length);
-  console.log('Available industries:', [...new Set(matches.map(f => f.industry))]);
   
   // Filter by industry
   if (criteria.industry && criteria.industry !== 'Any Industry') {
     console.log('Filtering by industry:', criteria.industry);
     const beforeFilter = matches.length;
     matches = matches.filter(franchise => {
-      const match = franchise.industry === criteria.industry;
-      console.log(`${franchise.name} (${franchise.industry}) matches ${criteria.industry}:`, match);
+      const match = franchise.industry === criteria.industry ||
+                   franchise.industry.toLowerCase().includes(criteria.industry.toLowerCase());
       return match;
     });
     console.log(`After industry filter: ${beforeFilter} -> ${matches.length}`);
@@ -802,7 +801,6 @@ export const getMatchingFranchises = (criteria: any): Franchise[] => {
   if (criteria.investmentRange) {
     console.log('Filtering by investment:', criteria.investmentRange);
     const [min, max] = getInvestmentRange(criteria.investmentRange);
-    console.log('Investment range:', min, 'to', max);
     const beforeFilter = matches.length;
     matches = matches.filter(franchise => 
       franchise.investmentMax >= min && franchise.investmentMin <= max
@@ -851,7 +849,6 @@ export const getMatchingFranchises = (criteria: any): Franchise[] => {
         default:
           match = true;
       }
-      console.log(`${franchise.name} (${businessModel}) matches ${criteria.lifestyle}:`, match);
       return match;
     });
     console.log(`After lifestyle filter: ${beforeFilter} -> ${matches.length}`);
@@ -864,18 +861,16 @@ export const getMatchingFranchises = (criteria: any): Franchise[] => {
     // For Education, return all education franchises regardless of other criteria
     if (criteria.industry === 'Education') {
       matches = allCanadianFranchises.filter(f => f.industry === 'Education');
-      console.log('Returning all Education franchises:', matches.length);
     }
     // For Business Services, return business service franchises
     else if (criteria.industry === 'Business Services') {
       matches = allCanadianFranchises.filter(f => f.industry === 'Business Services');
-      console.log('Returning all Business Services franchises:', matches.length);
     }
     // Otherwise return some popular franchises
     else {
-      matches = allCanadianFranchises.slice(0, 3);
-      console.log('Returning popular franchises as fallback:', matches.length);
+      matches = allCanadianFranchises.slice(0, 6);
     }
+    console.log('Returning fallback matches:', matches.length);
   }
   
   // Calculate match scores
@@ -898,7 +893,7 @@ export const getMatchingFranchises = (criteria: any): Franchise[] => {
     return (b.matchScore || 0) - (a.matchScore || 0);
   });
   
-  const finalMatches = matches.slice(0, 6); // Return top 6 matches
+  const finalMatches = matches.slice(0, 9); // Return top 9 matches
   console.log('Final matches to return:', finalMatches.length);
   return finalMatches;
 };
