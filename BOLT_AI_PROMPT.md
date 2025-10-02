@@ -662,3 +662,356 @@ FRONTEND_URL="http://localhost:3000"
 - Loading states and skeletons
 
 This comprehensive specification should provide everything needed to build a production-ready franchise matching platform with monetization capabilities, proper security, and scalability considerations.
+
+---
+
+# Franchise Feature Integration for BuyersAlike
+
+## 🎯 Additional Feature Requirements
+
+Implement a new 'Franchise Opportunities' feature within the BuyersAlike platform, mirroring the existing 'Business Opportunities' display structure.
+
+### Core Requirements:
+
+#### 1. Dedicated Franchise Section
+Create a new primary category filter specifically for 'Franchises'. This filter should appear alongside existing categories (Real Estate, Gas Station, Entertainment, Logistics) and allow users to exclusively view franchise listings.
+
+```typescript
+// Enhanced category structure
+const categories = [
+  { name: 'All', count: allOpportunities.length },
+  { name: 'Franchises', count: franchiseOpportunities.length }, // NEW
+  { name: 'Real Estate', count: realEstateOpportunities.length },
+  { name: 'Gas Station', count: gasStationOpportunities.length },
+  { name: 'Entertainment', count: entertainmentOpportunities.length },
+  { name: 'Logistics', count: logisticsOpportunities.length },
+  { name: 'Business Services', count: businessServiceOpportunities.length }
+];
+```
+
+#### 2. API Integration for Canadian Franchises
+
+Develop an API that pulls franchise opportunities from designated Canadian franchise databases:
+
+```typescript
+// Enhanced API endpoints for Canadian franchise data
+const canadianFranchiseAPIs = {
+  cfa: {
+    name: 'Canadian Franchise Association',
+    baseUrl: 'https://api.cfa.ca/v1',
+    endpoints: {
+      search: '/franchises/search',
+      details: '/franchises/{id}',
+      categories: '/categories'
+    }
+  },
+  franchiseCanada: {
+    name: 'Franchise Canada Directory',
+    baseUrl: 'https://api.franchisecanada.online/v1',
+    endpoints: {
+      opportunities: '/opportunities',
+      provinces: '/locations/provinces'
+    }
+  },
+  betheboss: {
+    name: 'BeTheBoss.ca',
+    baseUrl: 'https://api.betheboss.ca/v2',
+    endpoints: {
+      franchises: '/franchises',
+      search: '/search'
+    }
+  }
+};
+```
+
+**Required Franchise Data Fields:**
+- Franchise Name
+- Investment Range (e.g., $10,000 - $500,000)
+- Detailed Description of the franchise opportunity
+- Location (targeting all provinces and territories across Canada)
+- Relevant Image for the franchise listing
+- Date Posted
+- Number of partners/locations (contact metric)
+- Industry/Category classification
+- Support provided (training, marketing, etc.)
+- Franchise fee and royalty information
+
+#### 3. On-Platform Display (No External Links)
+
+All franchise listings must be displayed directly on the BuyersAlike platform with detailed internal views:
+
+```typescript
+// Franchise detail modal/page structure
+interface FranchiseDetailView {
+  basicInfo: {
+    name: string;
+    brand: string;
+    industry: string;
+    investmentRange: string;
+    description: string;
+    image: string;
+  };
+  financials: {
+    franchiseFee: number;
+    royaltyFee: string;
+    liquidCapitalRequired: number;
+    totalInvestment: string;
+  };
+  support: {
+    training: boolean;
+    marketing: boolean;
+    operations: boolean;
+    siteSelection: boolean;
+    ongoingSupport: string[];
+  };
+  locations: {
+    availableProvinces: string[];
+    existingLocations: number;
+    territoryRights: string;
+  };
+  contact: {
+    franchiseDevelopment: string;
+    phone: string;
+    email: string;
+  };
+}
+```
+
+#### 4. Integrated Contact Mechanism
+
+Provide multiple contact options within the BuyersAlike platform:
+
+```typescript
+// Contact system implementation
+interface FranchiseContactSystem {
+  // Internal messaging system
+  sendMessage: (franchiseId: string, message: string, userInfo: UserInfo) => Promise<void>;
+  
+  // Information request system
+  requestInfo: (franchiseId: string, requestType: 'brochure' | 'financials' | 'meeting') => Promise<void>;
+  
+  // Lead tracking
+  trackInterest: (franchiseId: string, userId: string, interactionType: string) => Promise<void>;
+  
+  // Contact form
+  submitContactForm: (franchiseId: string, contactData: ContactFormData) => Promise<void>;
+}
+
+// Contact form fields
+interface ContactFormData {
+  name: string;
+  email: string;
+  phone: string;
+  investmentCapacity: string;
+  timeframe: string;
+  experience: string;
+  preferredLocation: string;
+  specificQuestions: string;
+}
+```
+
+#### 5. Search and Filter Functionality
+
+Enhanced search capabilities for franchise-specific needs:
+
+```typescript
+// Franchise-specific filters
+interface FranchiseFilters {
+  investmentRange: {
+    min: number;
+    max: number;
+  };
+  provinces: string[];
+  industries: string[];
+  franchiseFeeRange: {
+    min: number;
+    max: number;
+  };
+  supportTypes: string[];
+  experienceRequired: 'none' | 'some' | 'extensive';
+  businessModel: 'retail' | 'service' | 'restaurant' | 'b2b' | 'home-based';
+}
+
+// Enhanced search functionality
+const searchFranchises = (query: string, filters: FranchiseFilters) => {
+  return franchises.filter(franchise => {
+    // Text search across multiple fields
+    const textMatch = [
+      franchise.name,
+      franchise.description,
+      franchise.industry,
+      franchise.businessModel
+    ].some(field => 
+      field.toLowerCase().includes(query.toLowerCase())
+    );
+    
+    // Investment range filter
+    const investmentMatch = 
+      franchise.investmentMin >= filters.investmentRange.min &&
+      franchise.investmentMax <= filters.investmentRange.max;
+    
+    // Location filter
+    const locationMatch = filters.provinces.length === 0 ||
+      filters.provinces.some(province => 
+        franchise.availableProvinces.includes(province)
+      );
+    
+    return textMatch && investmentMatch && locationMatch;
+  });
+};
+```
+
+#### 6. Admin Approval Process
+
+Implement comprehensive admin workflow for franchise listings:
+
+```typescript
+// Admin approval system
+interface FranchiseApprovalSystem {
+  // Approval statuses
+  status: 'pending' | 'under_review' | 'approved' | 'rejected' | 'requires_changes';
+  
+  // Admin actions
+  approveListings: (franchiseIds: string[], adminId: string) => Promise<void>;
+  rejectListings: (franchiseIds: string[], reason: string, adminId: string) => Promise<void>;
+  requestChanges: (franchiseId: string, changes: string[], adminId: string) => Promise<void>;
+  
+  // Approval workflow
+  submissionQueue: FranchiseSubmission[];
+  reviewHistory: ApprovalAction[];
+  
+  // Automated checks
+  validateSubmission: (submission: FranchiseSubmission) => ValidationResult;
+  flagSuspiciousListings: (submission: FranchiseSubmission) => SuspiciousFlag[];
+}
+
+// Admin dashboard components
+interface AdminDashboardFeatures {
+  pendingApprovals: FranchiseSubmission[];
+  approvalMetrics: {
+    totalSubmissions: number;
+    approvedThisMonth: number;
+    rejectedThisMonth: number;
+    averageReviewTime: number;
+  };
+  bulkActions: {
+    approveSelected: (ids: string[]) => void;
+    rejectSelected: (ids: string[], reason: string) => void;
+  };
+  qualityControls: {
+    duplicateDetection: boolean;
+    imageValidation: boolean;
+    contactInfoVerification: boolean;
+  };
+}
+```
+
+#### 7. Design and UI/UX Requirements
+
+Maintain visual consistency with existing BuyersAlike design:
+
+```typescript
+// Franchise card component structure
+interface FranchiseCardProps {
+  franchise: {
+    id: string;
+    name: string;
+    image: string;
+    investment: string;
+    description: string;
+    postedDate: string;
+    partners: string; // or locations count
+    industry: string;
+    approvalStatus: 'approved' | 'pending' | 'under_review';
+  };
+  onLearnMore: (franchiseId: string) => void;
+  onContact: (franchiseId: string) => void;
+}
+
+// Card layout matching existing business opportunities
+const FranchiseCard = ({ franchise, onLearnMore, onContact }) => (
+  <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200">
+    {/* Image with approval status badge */}
+    <div className="h-48 overflow-hidden relative">
+      <img src={franchise.image} alt={franchise.name} className="w-full h-full object-cover" />
+      {franchise.approvalStatus === 'pending' && (
+        <div className="absolute top-3 right-3 px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold">
+          Please approve
+        </div>
+      )}
+    </div>
+    
+    {/* Content matching existing layout */}
+    <div className="p-6">
+      <div className="flex items-center gap-2 mb-3">
+        <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium">
+          Franchise
+        </span>
+        <h3 className="text-xl font-bold text-gray-900">{franchise.name}</h3>
+      </div>
+      
+      {/* Investment and details */}
+      <div className="space-y-2 mb-4">
+        <div className="flex items-center gap-2">
+          <span className="text-lg">💰</span>
+          <div>
+            <span className="text-sm text-gray-600">Investment: </span>
+            <span className="font-bold text-green-600 text-lg">{franchise.investment}</span>
+          </div>
+        </div>
+      </div>
+      
+      {/* Description */}
+      <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-4">
+        {franchise.description}
+      </p>
+      
+      {/* Action buttons */}
+      <div className="flex gap-3 mb-4">
+        <button 
+          onClick={() => onLearnMore(franchise.id)}
+          className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg font-medium hover:shadow-lg transition-all duration-200"
+        >
+          Learn More
+        </button>
+        <button 
+          onClick={() => onContact(franchise.id)}
+          className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors duration-200"
+        >
+          Contact Franchise
+        </button>
+      </div>
+      
+      {/* Footer info */}
+      <div className="flex items-center justify-between text-sm text-gray-500 pt-4 border-t border-gray-100">
+        <div className="flex items-center gap-1">
+          <Calendar className="w-4 h-4" />
+          <span>Posted {franchise.postedDate}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <Users className="w-4 h-4" />
+          <span>{franchise.partners}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+```
+
+### Implementation Priority:
+
+1. **Phase 1**: Basic franchise category filter and display
+2. **Phase 2**: Canadian franchise API integration
+3. **Phase 3**: Detailed franchise view and contact system
+4. **Phase 4**: Admin approval workflow
+5. **Phase 5**: Advanced search and filtering
+6. **Phase 6**: Analytics and optimization
+
+### Success Metrics:
+- Number of franchise inquiries generated
+- User engagement with franchise listings
+- Conversion rate from view to contact
+- Admin approval efficiency
+- Search and filter usage patterns
+
+This integration ensures BuyersAlike becomes a comprehensive platform for Canadian franchise opportunities while maintaining the existing user experience and design consistency.
