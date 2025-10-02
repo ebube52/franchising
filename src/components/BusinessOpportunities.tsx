@@ -236,7 +236,9 @@ export const BusinessOpportunities: React.FC = () => {
   const handleQuizComplete = (matches: any[]) => {
     console.log('=== HANDLING QUIZ COMPLETION ===');
     console.log('Received matches:', matches.length);
-    console.log('Match details:', matches.map(m => `${m.name} - ${m.industry}`));
+    if (matches && matches.length > 0) {
+      console.log('Match details:', matches.map(m => `${m.name} - ${m.industry}`));
+    }
     
     if (matches && matches.length > 0) {
       // Convert franchise matches to opportunity format with real data
@@ -268,20 +270,8 @@ export const BusinessOpportunities: React.FC = () => {
       setOpportunities(franchiseOpportunities);
       setSelectedCategory('Franchises');
     } else {
-      // Fallback: show some default franchises if no matches
-      const defaultFranchises: Opportunity[] = [
-        {
-          id: 'tim-hortons-default',
-          title: 'Tim Hortons',
-          image: 'https://images.pexels.com/photos/302899/pexels-photo-302899.jpeg',
-          investment: '$438K - $2.2M',
-          description: 'Canada\'s iconic coffee and donut chain offering a proven business model.',
-          postedDate: 'Available Now',
-          partners: '95% Match',
-          type: 'franchise'
-        }
-      ];
-      setOpportunities(defaultFranchises);
+      // Fallback: show all available opportunities if no matches
+      setOpportunities(mockOpportunities);
       setSelectedCategory('Franchises');
     }
     setShowFranchiseResults(true);
@@ -355,11 +345,17 @@ export const BusinessOpportunities: React.FC = () => {
 
   const filteredOpportunities = opportunities.filter(opp => {
     const matchesSearch = opp.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         opp.description.toLowerCase().includes(searchTerm.toLowerCase());
+                         opp.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         opp.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         opp.investment.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'All Categories' || 
                            (selectedCategory === 'Franchises' && opp.type === 'franchise') ||
                            (selectedCategory === 'Business Opportunities' && opp.type === 'business') ||
-                           (selectedCategory === 'Real Estate' && opp.type === 'real-estate');
+                           (selectedCategory === 'Real Estate' && opp.type === 'real-estate') ||
+                           (selectedCategory === 'Food & Beverage' && opp.title.toLowerCase().includes('food')) ||
+                           (selectedCategory === 'Business Services' && (opp.type === 'franchise' || opp.type === 'business')) ||
+                           (selectedCategory === 'Education' && opp.title.toLowerCase().includes('education')) ||
+                           (selectedCategory === 'Retail' && opp.title.toLowerCase().includes('retail'));
     return matchesSearch && matchesCategory;
   });
 
