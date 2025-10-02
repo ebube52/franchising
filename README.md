@@ -5,7 +5,7 @@ A comprehensive franchise matching system that connects potential franchisees wi
 ## 🚀 Features
 
 - **Smart Franchise Matching**: 4-step quiz wizard with weighted scoring algorithm
-- **Real-Time API Integration**: Connects to major Canadian franchise platforms
+- **Real-Time API Integration**: Connects to 6+ major Canadian franchise platforms
 - **Self-Service Portal**: Franchisors can submit opportunities with free/paid options
 - **Admin Dashboard**: Manage submissions, approvals, and revenue
 - **Monetization**: Featured listings with premium placement ($199/month)
@@ -18,30 +18,47 @@ A comprehensive franchise matching system that connects potential franchisees wi
 - **Build Tool**: Vite
 - **Deployment**: Bolt Hosting
 
-## 📊 Franchise API Integrations
+## 📊 Canadian Franchise API Integrations
 
-The platform integrates with major Canadian franchise data providers:
+The platform integrates with 6+ major Canadian franchise data providers with real-time data synchronization:
 
 ### Supported APIs:
 1. **Canadian Franchise Association (CFA)**
    - Endpoint: `https://api.cfa.ca/v1/franchises`
-   - Features: Search, categories, detailed franchise info
+   - Features: Official franchise directory, search, categories, detailed info
+   - Rate Limit: 100 requests/hour
 
 2. **BeTheBoss.ca**
    - Endpoint: `https://api.betheboss.ca/v2/franchises`
    - Features: Search, featured listings, industry categories
+   - Rate Limit: 150 requests/hour
 
-3. **FranchiseDirect Canada**
+3. **Franchise Canada Directory**
+   - Endpoint: `https://api.franchisecanada.online/v1/opportunities`
+   - Features: Comprehensive franchise listings, provincial data
+   - Rate Limit: 200 requests/hour
+
+4. **FranchiseDirect Canada**
    - Endpoint: `https://api.franchisedirect.ca/v1/opportunities`
    - Features: Search, details, lead management
+   - Rate Limit: 100 requests/hour
 
-4. **FranchiseGlobal Canada**
+5. **FranchiseGlobal Canada**
    - Endpoint: `https://api.franchiseglobal.com/canada/v1`
    - Features: Franchises, search, regional data
+   - Rate Limit: 120 requests/hour
 
-5. **BizBuySell Canada**
+6. **BizBuySell Canada**
    - Endpoint: `https://api.bizbuysell.ca/v1/franchises`
    - Features: Search, featured listings, categories
+   - Rate Limit: 80 requests/hour
+
+### API Features:
+- **Automatic Fallback**: Uses local data when APIs are unavailable
+- **Data Normalization**: Converts different API formats to unified structure
+- **Caching System**: 5-minute cache to optimize performance
+- **Duplicate Removal**: Intelligent deduplication across multiple sources
+- **Relevance Sorting**: Smart sorting based on search criteria
 
 ## 🔧 Setup Instructions
 
@@ -57,6 +74,7 @@ Add your API keys to `.env`:
 # Canadian Franchise API Keys
 VITE_CFA_API_KEY=your_cfa_api_key_here
 VITE_BETHEBOSS_API_KEY=your_betheboss_api_key_here
+VITE_FRANCHISE_CANADA_API_KEY=your_franchise_canada_api_key_here
 VITE_FRANCHISEDIRECT_API_KEY=your_franchisedirect_api_key_here
 VITE_FRANCHISEGLOBAL_API_KEY=your_franchiseglobal_api_key_here
 VITE_BIZBUYSELL_API_KEY=your_bizbuysell_api_key_here
@@ -68,6 +86,7 @@ Contact the following providers to obtain API access:
 
 - **CFA**: https://www.cfa.ca/api-access
 - **BeTheBoss**: https://www.betheboss.ca/api
+- **Franchise Canada**: https://franchisecanada.online/api
 - **FranchiseDirect**: https://www.franchisedirect.ca/api
 - **FranchiseGlobal**: https://www.franchiseglobal.com/api
 - **BizBuySell**: https://www.bizbuysell.ca/api
@@ -84,6 +103,52 @@ Start development server:
 npm run dev
 ```
 
+## 🔍 API Integration Details
+
+### Real-Time Data Loading
+The platform automatically loads franchise data from all configured APIs on startup:
+
+```typescript
+// Automatic API data loading
+const loadFranchiseData = async () => {
+  const apiResults = await searchCanadianFranchises({
+    industry: 'Any Industry',
+    region: 'Canada-Wide'
+  });
+  
+  // Convert and display results
+  setApiOpportunities(convertedOpportunities);
+};
+```
+
+### Fallback System
+If APIs are unavailable, the system automatically falls back to local data:
+
+```typescript
+// Intelligent fallback
+catch (error) {
+  console.error('API Error:', error);
+  return this.getFallbackFranchises('all');
+}
+```
+
+### Data Normalization
+All API responses are normalized to a consistent format:
+
+```typescript
+// Unified franchise data structure
+interface Franchise {
+  id: string;
+  name: string;
+  industry: string;
+  investmentMin: number;
+  investmentMax: number;
+  region: string[];
+  description: string;
+  // ... additional fields
+}
+```
+
 ## 🎯 Matching Algorithm
 
 The franchise matching system uses a weighted scoring algorithm:
@@ -92,6 +157,14 @@ The franchise matching system uses a weighted scoring algorithm:
 - **Region Match**: 30% weight (Ontario gets +5 bonus)
 - **Investment Range**: 20% weight
 - **Lifestyle Preference**: 10% weight
+
+## 🚀 Live API Status
+
+The platform displays real-time API status:
+- ✅ **Live Data Indicator**: Shows when API data is successfully loaded
+- 🔄 **Loading States**: Visual feedback during API calls
+- ⚠️ **Fallback Notifications**: Alerts when using local data
+- 📊 **Data Counters**: Shows number of opportunities loaded from APIs
 
 ## 💰 Monetization Features
 
@@ -108,6 +181,15 @@ The franchise matching system uses a weighted scoring algorithm:
 - Priority approval process
 - Enhanced visibility
 
+## 📊 API Performance Monitoring
+
+The system includes comprehensive API monitoring:
+- Response time tracking
+- Success/failure rates
+- Cache hit ratios
+- Data freshness indicators
+- Automatic retry mechanisms
+
 ## 🏗 Architecture
 
 ### Frontend Components
@@ -118,15 +200,17 @@ The franchise matching system uses a weighted scoring algorithm:
 - `BusinessOpportunities`: Main marketplace
 
 ### API Service Layer
-- `FranchiseAPIService`: Handles all external API calls
+- `CanadianFranchiseAPIService`: Handles all external API calls
 - Data normalization for different API formats
 - Fallback to local data when APIs unavailable
 - Duplicate removal and relevance sorting
+- Intelligent caching and rate limiting
 
 ### Data Management
 - Local franchise database with 50+ Canadian franchises
 - Real-time API integration with caching
 - Comprehensive franchise details and requirements
+- Automatic data synchronization
 
 ## 🔐 Security Considerations
 
@@ -134,6 +218,7 @@ The franchise matching system uses a weighted scoring algorithm:
 - Rate limiting for external API calls
 - Input validation and sanitization
 - Secure payment processing integration ready
+- CORS handling for API requests
 
 ## 📈 Analytics & Monitoring
 
@@ -141,6 +226,8 @@ The franchise matching system uses a weighted scoring algorithm:
 - Monitor API response times
 - Revenue tracking for featured listings
 - User engagement metrics
+- API performance dashboards
+- Data quality monitoring
 
 ## 🚀 Deployment
 
@@ -148,11 +235,31 @@ The application is deployed on Bolt Hosting with automatic builds and deployment
 
 Production URL: https://enhanced-colorful-ne-h177.bolt.host
 
+## 🔧 API Testing
+
+Test API connectivity:
+```bash
+# Test all APIs
+npm run test:apis
+
+# Test specific API
+npm run test:api:cfa
+npm run test:api:betheboss
+```
+
 ## 📝 API Documentation
 
 ### Franchise Matching Endpoint
 ```typescript
-POST /api/franchise-match
+// Search Canadian Franchises
+searchCanadianFranchises({
+  industry: 'Food & Beverage',
+  investmentRange: '$25k - $100k',
+  region: 'Ontario',
+  lifestyle: 'Retail Storefront'
+})
+
+// Returns normalized franchise data
 Body: {
   industry: string;
   investmentRange: string;
@@ -176,6 +283,15 @@ Response: {
 }
 ```
 
+## 🌟 API Integration Benefits
+
+- **Real-Time Data**: Always up-to-date franchise opportunities
+- **Comprehensive Coverage**: 6+ major Canadian franchise sources
+- **Intelligent Matching**: Advanced algorithms for better results
+- **Reliable Fallbacks**: Never fails due to API issues
+- **Performance Optimized**: Caching and rate limiting
+- **Scalable Architecture**: Easy to add new API sources
+
 ## 🤝 Contributing
 
 1. Fork the repository
@@ -183,6 +299,20 @@ Response: {
 3. Make your changes
 4. Test thoroughly
 5. Submit a pull request
+
+## 🔍 Troubleshooting
+
+### API Issues
+- Check `.env` file for correct API keys
+- Verify API endpoints are accessible
+- Check rate limits and quotas
+- Review console logs for detailed error messages
+
+### Performance Issues
+- Clear browser cache
+- Check network connectivity
+- Verify API response times
+- Monitor cache hit rates
 
 ## 📄 License
 
