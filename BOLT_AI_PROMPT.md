@@ -665,36 +665,143 @@ This comprehensive specification should provide everything needed to build a pro
 
 ---
 
-# Franchise Feature Integration for BuyersAlike
+# BuyersAlike Platform - Franchise Feature Integration
+
+Based on the provided BuyersAlike interface screenshot, implement a comprehensive franchise opportunities system that matches the existing platform design and functionality.
 
 ## 🎯 Additional Feature Requirements
 
-Implement a new 'Franchise Opportunities' feature within the BuyersAlike platform, mirroring the existing 'Business Opportunities' display structure.
+### Platform Structure Overview
+The BuyersAlike platform features a sidebar navigation with:
+- Partnerships
+- **Opportunities** (current active section)
+- Messaging  
+- Forum
+- News
+- Profile
+- Settings
+- Admin
+- Sign Out
 
-### Core Requirements:
+The main content area shows a search interface with category filtering and card-based opportunity listings.
 
-#### 1. Dedicated Franchise Section
-Create a new primary category filter specifically for 'Franchises'. This filter should appear alongside existing categories (Real Estate, Gas Station, Entertainment, Logistics) and allow users to exclusively view franchise listings.
+## 🎯 Core Implementation Requirements
+
+### 1. Enhanced Category Filter System
+
+Based on the image showing "Franchises" selected in the category dropdown, implement a comprehensive category system:
 
 ```typescript
-// Enhanced category structure
+// Category system matching the BuyersAlike interface
 const categories = [
-  { name: 'All', count: allOpportunities.length },
-  { name: 'Franchises', count: franchiseOpportunities.length }, // NEW
-  { name: 'Real Estate', count: realEstateOpportunities.length },
-  { name: 'Gas Station', count: gasStationOpportunities.length },
-  { name: 'Entertainment', count: entertainmentOpportunities.length },
-  { name: 'Logistics', count: logisticsOpportunities.length },
-  { name: 'Business Services', count: businessServiceOpportunities.length }
+  'All Opportunities',
+  'Franchises',           // Featured category as shown in image
+  'Business Opportunities',
+  'Real Estate',
+  'Gas Station',
+  'Entertainment', 
+  'Logistics',
+  'Technology',
+  'Food & Beverage',
+  'Retail',
+  'Services'
 ];
+
+// Dropdown interface matching the image
+interface CategoryDropdown {
+  selectedCategory: string;
+  options: string[];
+  onCategoryChange: (category: string) => void;
+  placeholder: "Select category...";
+}
 ```
 
-#### 2. API Integration for Canadian Franchises
+### 2. Search Interface Implementation
+
+Replicate the exact search interface shown in the image:
+
+```typescript
+// Search interface matching BuyersAlike design
+interface SearchInterface {
+  searchBar: {
+    placeholder: "Search by title or description...";
+    value: string;
+    onChange: (value: string) => void;
+  };
+  categoryFilter: {
+    label: "Category";
+    selectedValue: "Franchises"; // As shown in image
+    dropdown: CategoryDropdown;
+  };
+  clearFilters: {
+    button: "Clear Filters";
+    onClick: () => void;
+  };
+}
+```
+
+### 3. Opportunity Card Design (Exact Match)
+
+Based on the two cards shown in the image ("Nicety Franchise" and "Reno Box - Business Opportunity"), implement this exact structure:
+
+```typescript
+// Card structure matching the BuyersAlike interface
+interface OpportunityCard {
+  // Header image (as shown in both cards)
+  image: string;
+  
+  // Title section
+  title: string; // "Nicety Franchise" / "Reno Box - Business Opportunity"
+  
+  // Investment section with money icon
+  investment: {
+    icon: "💰"; // Yellow money bag emoji as shown
+    label: "Investment:";
+    range: string; // "$10000.00 - $500000.00" format
+  };
+  
+  // Status/Description section
+  content: {
+    status?: "Please approve"; // For pending items like Nicety
+    description?: string; // Full description like Reno Box
+  };
+  
+  // Footer information
+  footer: {
+    postedDate: string; // "Posted 21 September 2025"
+    partners: string; // "1/5 partners" format with user icon
+  };
+}
+```
+
+### 4. Approval Status System
+
+Implement the approval system as shown in the "Nicety Franchise" card:
+
+```typescript
+// Approval status system
+interface ApprovalStatus {
+  status: 'pending' | 'approved' | 'rejected' | 'under_review';
+  displayText: {
+    pending: "Please approve";
+    approved: ""; // No text shown for approved
+    rejected: "Rejected";
+    under_review: "Under review";
+  };
+  adminActions: {
+    approve: (opportunityId: string) => void;
+    reject: (opportunityId: string, reason: string) => void;
+    requestChanges: (opportunityId: string, changes: string[]) => void;
+  };
+}
+```
+
+### 5. Canadian Franchise API Integration
 
 Develop an API that pulls franchise opportunities from designated Canadian franchise databases:
 
 ```typescript
-// Enhanced API endpoints for Canadian franchise data
+// Canadian franchise API integration
 const canadianFranchiseAPIs = {
   cfa: {
     name: 'Canadian Franchise Association',
@@ -724,136 +831,526 @@ const canadianFranchiseAPIs = {
 };
 ```
 
-**Required Franchise Data Fields:**
-- Franchise Name
-- Investment Range (e.g., $10,000 - $500,000)
-- Detailed Description of the franchise opportunity
-- Location (targeting all provinces and territories across Canada)
-- Relevant Image for the franchise listing
-- Date Posted
-- Number of partners/locations (contact metric)
-- Industry/Category classification
-- Support provided (training, marketing, etc.)
-- Franchise fee and royalty information
+### 6. Data Structure Matching Interface
 
-#### 3. On-Platform Display (No External Links)
-
-All franchise listings must be displayed directly on the BuyersAlike platform with detailed internal views:
+Based on the cards shown, implement this exact data structure:
 
 ```typescript
-// Franchise detail modal/page structure
-interface FranchiseDetailView {
-  basicInfo: {
-    name: string;
-    brand: string;
-    industry: string;
-    investmentRange: string;
-    description: string;
-    image: string;
+// Opportunity data structure matching the interface
+interface Opportunity {
+  id: string;
+  title: string; // "Nicety Franchise", "Reno Box - Business Opportunity"
+  type: 'franchise' | 'business' | 'real-estate';
+  
+  // Investment information (prominently displayed)
+  investment: {
+    min: number; // 10000.00
+    max: number; // 500000.00
+    currency: 'CAD';
+    display: string; // "$10000.00 - $500000.00"
   };
-  financials: {
-    franchiseFee: number;
-    royaltyFee: string;
-    liquidCapitalRequired: number;
-    totalInvestment: string;
+  
+  // Visual elements
+  image: string; // Header image URL
+  
+  // Content
+  description?: string; // Full description for approved items
+  status?: 'pending' | 'approved' | 'rejected'; // Approval status
+  
+  // Metadata
+  postedDate: string; // "21 September 2025"
+  partners: {
+    current: number; // 1
+    total: number; // 5
+    display: string; // "1/5 partners"
   };
-  support: {
-    training: boolean;
-    marketing: boolean;
-    operations: boolean;
-    siteSelection: boolean;
-    ongoingSupport: string[];
+  
+  // Location and categorization
+  location: string[]; // Canadian provinces/territories
+  category: string; // Maps to category filter
+  industry?: string;
+}
+```
+
+### 7. Responsive Card Layout
+
+Implement the exact card layout shown in the image:
+
+```css
+/* Card layout matching BuyersAlike design */
+.opportunity-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.opportunity-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Header image section */
+.card-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+/* Content section */
+.card-content {
+  padding: 20px;
+}
+
+/* Title */
+.card-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 12px;
+}
+
+/* Investment section with money icon */
+.investment-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.investment-icon {
+  font-size: 16px; /* 💰 emoji */
+}
+
+.investment-text {
+  font-size: 14px;
+  color: #666;
+}
+
+.investment-amount {
+  font-weight: 600;
+  color: #2d5a27; /* Green color for money */
+}
+
+/* Status/Description */
+.card-status {
+  color: #e67e22; /* Orange for "Please approve" */
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.card-description {
+  color: #666;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+/* Footer */
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #999;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 12px;
+}
+
+.posted-date::before {
+  content: "Posted ";
+}
+
+.partners-count {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.partners-icon {
+  width: 12px;
+  height: 12px;
+  opacity: 0.7;
+}
+```
+
+### 8. Admin Interface Integration
+
+Based on the "Admin" section visible in the sidebar, implement admin functionality:
+
+```typescript
+// Admin interface for opportunity management
+interface AdminInterface {
+  // Pending approvals (like "Nicety Franchise")
+  pendingOpportunities: {
+    list: Opportunity[];
+    actions: {
+      approve: (id: string) => void;
+      reject: (id: string, reason: string) => void;
+      bulkApprove: (ids: string[]) => void;
+    };
   };
-  locations: {
-    availableProvinces: string[];
-    existingLocations: number;
-    territoryRights: string;
+  
+  // Analytics dashboard
+  analytics: {
+    totalOpportunities: number;
+    pendingApprovals: number;
+    monthlySubmissions: number;
+    categoryBreakdown: Record<string, number>;
   };
-  contact: {
-    franchiseDevelopment: string;
-    phone: string;
-    email: string;
+  
+  // User management
+  userManagement: {
+    activeUsers: number;
+    newRegistrations: number;
+    partnerConnections: number;
   };
 }
 ```
 
-#### 4. Integrated Contact Mechanism
+### 9. On-Platform Display System
 
-Provide multiple contact options within the BuyersAlike platform:
+All opportunities must be displayed directly on the BuyersAlike platform:
 
 ```typescript
-// Contact system implementation
-interface FranchiseContactSystem {
+// Detailed view modal/page structure
+interface OpportunityDetailView {
+  basicInfo: {
+    title: string;
+    type: 'franchise' | 'business' | 'real-estate';
+    category: string;
+    investment: InvestmentDetails;
+    description: string;
+    image: string;
+  };
+  
+  financials: {
+    investmentRange: string;
+    additionalFees?: string;
+    expectedReturns?: string;
+    paymentTerms?: string;
+  };
+  
+  support: {
+    trainingProvided?: boolean;
+    marketingSupport?: boolean;
+    operationalSupport?: boolean;
+    ongoingSupport?: string[];
+  };
+  
+  locations: {
+    availableLocations: string[];
+    currentPartners: number;
+    maxPartners: number;
+  };
+  
+  contact: {
+    contactPerson: string;
+    phone: string;
+    email: string;
+    preferredContact: 'phone' | 'email' | 'message';
+  };
+}
+```
+
+### 10. Integrated Contact System
+
+Implement contact functionality within the platform:
+
+```typescript
+// Contact system matching BuyersAlike platform
+interface ContactSystem {
   // Internal messaging system
-  sendMessage: (franchiseId: string, message: string, userInfo: UserInfo) => Promise<void>;
+  sendMessage: (opportunityId: string, message: string, userInfo: UserInfo) => Promise<void>;
   
   // Information request system
-  requestInfo: (franchiseId: string, requestType: 'brochure' | 'financials' | 'meeting') => Promise<void>;
+  requestInfo: (opportunityId: string, requestType: 'details' | 'financials' | 'meeting') => Promise<void>;
   
   // Lead tracking
-  trackInterest: (franchiseId: string, userId: string, interactionType: string) => Promise<void>;
+  trackInterest: (opportunityId: string, userId: string, interactionType: string) => Promise<void>;
   
-  // Contact form
-  submitContactForm: (franchiseId: string, contactData: ContactFormData) => Promise<void>;
+  // Partnership interest
+  expressInterest: (opportunityId: string, userData: PartnershipInterest) => Promise<void>;
 }
 
-// Contact form fields
-interface ContactFormData {
+// Partnership interest form
+interface PartnershipInterest {
   name: string;
   email: string;
   phone: string;
   investmentCapacity: string;
-  timeframe: string;
+  timeframe: 'immediate' | '3-months' | '6-months' | '1-year';
   experience: string;
   preferredLocation: string;
   specificQuestions: string;
 }
 ```
 
-#### 5. Search and Filter Functionality
+### 11. Search and Filter Implementation
 
-Enhanced search capabilities for franchise-specific needs:
+Implement the exact search functionality shown in the interface:
 
 ```typescript
-// Franchise-specific filters
-interface FranchiseFilters {
+// Search and filter system matching the interface
+interface SearchFilters {
+  // Text search (as shown in search bar)
+  searchQuery: string;
+  
+  // Category filter (dropdown as shown)
+  selectedCategory: string;
+  
+  // Advanced filters
   investmentRange: {
     min: number;
     max: number;
   };
-  provinces: string[];
-  industries: string[];
-  franchiseFeeRange: {
-    min: number;
-    max: number;
-  };
-  supportTypes: string[];
-  experienceRequired: 'none' | 'some' | 'extensive';
-  businessModel: 'retail' | 'service' | 'restaurant' | 'b2b' | 'home-based';
+  
+  location: string[];
+  
+  partnershipStatus: 'available' | 'limited' | 'full';
+  
+  approvalStatus: 'all' | 'approved' | 'pending';
 }
 
-// Enhanced search functionality
-const searchFranchises = (query: string, filters: FranchiseFilters) => {
-  return franchises.filter(franchise => {
+// Search implementation
+const searchOpportunities = (query: string, filters: SearchFilters) => {
+  return opportunities.filter(opportunity => {
     // Text search across multiple fields
     const textMatch = [
-      franchise.name,
-      franchise.description,
-      franchise.industry,
-      franchise.businessModel
+      opportunity.title,
+      opportunity.description,
+      opportunity.category,
+      opportunity.type
     ].some(field => 
       field.toLowerCase().includes(query.toLowerCase())
     );
     
+    // Category filter (exact match as shown in dropdown)
+    const categoryMatch = filters.selectedCategory === 'All Opportunities' ||
+      opportunity.category === filters.selectedCategory ||
+      opportunity.type === filters.selectedCategory.toLowerCase();
+    
     // Investment range filter
     const investmentMatch = 
-      franchise.investmentMin >= filters.investmentRange.min &&
-      franchise.investmentMax <= filters.investmentRange.max;
+      opportunity.investment.min >= filters.investmentRange.min &&
+      opportunity.investment.max <= filters.investmentRange.max;
     
-    // Location filter
-    const locationMatch = filters.provinces.length === 0 ||
-      filters.provinces.some(province => 
-        franchise.availableProvinces.includes(province)
+    return textMatch && categoryMatch && investmentMatch;
+  });
+};
+```
+
+### 12. Partnership Tracking System
+
+Based on the "1/5 partners" display in the cards:
+
+```typescript
+// Partnership tracking system
+interface PartnershipTracker {
+  opportunityId: string;
+  currentPartners: number;
+  maxPartners: number;
+  
+  // Partnership status
+  status: 'open' | 'limited' | 'full';
+  
+  // Partner management
+  addPartner: (userId: string) => Promise<boolean>;
+  removePartner: (userId: string) => Promise<boolean>;
+  
+  // Display formatting
+  getDisplayText: () => string; // "1/5 partners"
+  getAvailableSlots: () => number; // 4
+  
+  // Notifications
+  notifyWhenAvailable: (userId: string) => Promise<void>;
+}
+```
+
+### 13. Responsive Grid Layout
+
+Implement the card grid layout shown in the image:
+
+```typescript
+// Grid layout configuration
+interface GridLayout {
+  // Responsive breakpoints
+  breakpoints: {
+    mobile: '1fr'; // Single column
+    tablet: 'repeat(2, 1fr)'; // Two columns
+    desktop: 'repeat(2, 1fr)'; // Two columns as shown
+    wide: 'repeat(3, 1fr)'; // Three columns for very wide screens
+  };
+  
+  // Card spacing
+  gap: '24px';
+  
+  // Container padding
+  padding: '24px';
+}
+
+// CSS Grid implementation
+.opportunities-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* As shown in image */
+  gap: 24px;
+  padding: 24px;
+}
+
+@media (max-width: 768px) {
+  .opportunities-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 1400px) {
+  .opportunities-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+```
+
+### 14. Navigation Integration
+
+Integrate with the existing sidebar navigation:
+
+```typescript
+// Navigation structure matching the sidebar
+interface SidebarNavigation {
+  sections: [
+    { name: 'Partnerships', icon: 'handshake', active: false },
+    { name: 'Opportunities', icon: 'briefcase', active: true }, // Current active
+    { name: 'Messaging', icon: 'message', active: false },
+    { name: 'Forum', icon: 'forum', active: false },
+    { name: 'News', icon: 'news', active: false }
+  ];
+  
+  userSections: [
+    { name: 'Profile', icon: 'user', active: false },
+    { name: 'Settings', icon: 'settings', active: false },
+    { name: 'Admin', icon: 'shield', active: false, adminOnly: true },
+    { name: 'Sign Out', icon: 'logout', action: 'signOut' }
+  ];
+}
+```
+
+## 🎨 Design System Matching BuyersAlike
+
+### Color Palette (Based on Image)
+```css
+:root {
+  /* Primary colors from the interface */
+  --bg-primary: #2a2a2a; /* Dark sidebar background */
+  --bg-secondary: #1a1a1a; /* Main content dark background */
+  --bg-card: #ffffff; /* White card backgrounds */
+  
+  /* Accent colors */
+  --accent-yellow: #f1c40f; /* Category dropdown border */
+  --accent-orange: #e67e22; /* "Please approve" text */
+  --accent-green: #2d5a27; /* Investment amounts */
+  
+  /* Text colors */
+  --text-primary: #1a1a1a; /* Card titles */
+  --text-secondary: #666666; /* Descriptions */
+  --text-muted: #999999; /* Footer text */
+  --text-white: #ffffff; /* Sidebar text */
+  
+  /* Interactive elements */
+  --border-default: #e0e0e0;
+  --border-focus: #f1c40f;
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+```
+
+### Typography System
+```css
+/* Typography matching the interface */
+.sidebar-text {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-white);
+}
+
+.card-title {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.investment-text {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent-green);
+}
+
+.status-text {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--accent-orange);
+}
+
+.description-text {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.footer-text {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+```
+
+## 🚀 Implementation Phases
+
+### Phase 1: Core Interface Replication
+- Replicate exact card layout and styling
+- Implement category dropdown with "Franchises" option
+- Add search functionality matching the interface
+- Create approval status system ("Please approve")
+
+### Phase 2: Data Integration
+- Implement Canadian franchise API connections
+- Add data normalization and validation
+- Create admin approval workflow
+- Implement partnership tracking (1/5 partners)
+
+### Phase 3: Enhanced Functionality
+- Add detailed opportunity views
+- Implement contact and messaging system
+- Create advanced filtering options
+- Add analytics and reporting
+
+### Phase 4: Optimization
+- Performance optimization
+- Mobile responsiveness refinement
+- SEO optimization
+- Analytics integration
+
+## ✅ Success Criteria
+
+The implementation will be considered successful when:
+
+1. **Visual Accuracy**: Interface matches the provided screenshot exactly
+2. **Functional Parity**: All features work as expected in the existing platform
+3. **Data Integration**: Canadian franchise data populates correctly
+4. **Admin Workflow**: Approval process works seamlessly
+5. **User Experience**: Smooth navigation and interaction
+6. **Performance**: Fast loading and responsive design
+7. **Scalability**: System handles growth in opportunities and users
+
+This comprehensive specification ensures the franchise feature integration matches the exact BuyersAlike interface while providing robust functionality for Canadian franchise opportunities.
       );
     
     return textMatch && investmentMatch && locationMatch;
