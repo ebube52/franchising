@@ -98,7 +98,7 @@ export const canadianFranchiseAPIs = {
   franchimp: {
     name: 'Franchimp RapidAPI',
     baseUrl: 'https://franchimp.p.rapidapi.com',
-    apiKey: import.meta.env.VITE_RAPIDAPI_KEY || 'e257b41281msh990698108fd4085p194fe6jsn8e75e035fac0',
+    apiKey: import.meta.env.VITE_RAPIDAPI_KEY,
     endpoints: {
       franchises: '/franchises',
       search: '/franchises/search',
