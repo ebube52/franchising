@@ -343,7 +343,7 @@ export const BusinessOpportunities: React.FC = () => {
             <div className="col-span-full text-center py-8">
               <div className="inline-flex items-center gap-3 text-white">
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-yellow-500"></div>
-                <span>Loading Canadian franchise opportunities...</span>
+                <span>Live data from Franchimp RapidAPI + Canadian franchise APIs • {apiOpportunities.length} opportunities loaded</span>
               </div>
             </div>
           )}

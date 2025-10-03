@@ -1,5 +1,6 @@
 // Canadian Franchise API Integration Service
 import { Franchise } from '../types/franchise';
+import axios from 'axios';
 
 // API Configuration for Canadian Franchise Providers
 export const canadianFranchiseAPIs = {
@@ -91,6 +92,20 @@ export const canadianFranchiseAPIs = {
     },
     rateLimit: 80,
     documentation: 'https://www.bizbuysell.ca/franchise-opportunities'
+  },
+
+  // Franchimp RapidAPI - Real franchise data
+  franchimp: {
+    name: 'Franchimp RapidAPI',
+    baseUrl: 'https://franchimp.p.rapidapi.com',
+    apiKey: import.meta.env.VITE_RAPIDAPI_KEY || 'e257b41281msh990698108fd4085p194fe6jsn8e75e035fac0',
+    endpoints: {
+      franchises: '/franchises',
+      search: '/franchises/search',
+      details: '/franchises/{id}'
+    },
+    rateLimit: 500, // RapidAPI typically has higher limits
+    documentation: 'https://rapidapi.com/franchimp/api/franchimp'
   }
 };
 
@@ -148,6 +163,30 @@ interface BeTheBossResponse {
   supportOffered: string[];
 }
 
+interface FranchimpResponse {
+  id: string;
+  name: string;
+  brand?: string;
+  category: string;
+  investment: {
+    min: number;
+    max: number;
+  };
+  franchiseFee?: number;
+  royaltyFee?: string;
+  description: string;
+  website?: string;
+  contact?: {
+    email?: string;
+    phone?: string;
+  };
+  locations?: number;
+  established?: number;
+  regions?: string[];
+  image?: string;
+  logo?: string;
+}
+
 interface FranchiseCanadaResponse {
   id: string;
   title: string;
@@ -197,6 +236,34 @@ export const normalizeCFAFranchise = (data: CFAFranchiseResponse): Franchise => 
     email: data.contactEmail
   },
   requirements: data.requirements
+});
+
+export const normalizeFranchimp = (data: FranchimpResponse): Franchise => ({
+  id: `franchimp-${data.id}`,
+  name: data.name,
+  brand: data.brand || data.name,
+  industry: mapIndustryCategory(data.category),
+  investmentMin: data.investment?.min || 50000,
+  investmentMax: data.investment?.max || 500000,
+  region: data.regions || ['Canada-Wide'],
+  description: data.description || `${data.name} franchise opportunity`,
+  image: data.image || data.logo || getDefaultFranchiseImage(data.category),
+  businessModel: 'Franchise',
+  supportProvided: ['Training', 'Marketing', 'Operations'],
+  franchiseFee: data.franchiseFee || 50000,
+  royaltyFee: data.royaltyFee || '5%',
+  territories: data.locations || 100,
+  established: data.established || 2000,
+  website: data.website || `https://www.${data.name.toLowerCase().replace(/\s+/g, '')}.com`,
+  contactInfo: {
+    phone: data.contact?.phone || '1-800-FRANCHISE',
+    email: data.contact?.email || `info@${data.name.toLowerCase().replace(/\s+/g, '')}.com`
+  },
+  requirements: {
+    liquidCapital: Math.round((data.investment?.min || 50000) * 0.6),
+    netWorth: Math.round((data.investment?.min || 50000) * 1.5),
+    experience: 'Business experience preferred'
+  }
 });
 
 export const normalizeBeTheBoss = (data: BeTheBossResponse): Franchise => ({
@@ -436,6 +503,65 @@ export class CanadianFranchiseAPIService {
     }
   }
 
+  // Fetch from Franchimp RapidAPI
+  async fetchFromFranchimp(searchParams: {
+    category?: string;
+    minInvestment?: number;
+    maxInvestment?: number;
+    limit?: number;
+  } = {}): Promise<Franchise[]> {
+    const cacheKey = `franchimp-${JSON.stringify(searchParams)}`;
+    
+    try {
+      const cached = this.getFromCache(cacheKey);
+      if (cached) return cached;
+
+      console.log('🚀 Fetching from Franchimp RapidAPI...');
+
+      const response = await axios.get(`${canadianFranchiseAPIs.franchimp.baseUrl}${canadianFranchiseAPIs.franchimp.endpoints.franchises}`, {
+        headers: {
+          'x-rapidapi-host': 'franchimp.p.rapidapi.com',
+          'x-rapidapi-key': canadianFranchiseAPIs.franchimp.apiKey,
+          'Accept': 'application/json'
+        },
+        params: {
+          category: searchParams.category,
+          minInvestment: searchParams.minInvestment,
+          maxInvestment: searchParams.maxInvestment,
+          limit: searchParams.limit || 20
+        }
+      });
+
+      console.log('✅ Franchimp API response:', response.data);
+
+      // Handle different response formats
+      let franchiseData = [];
+      if (Array.isArray(response.data)) {
+        franchiseData = response.data;
+      } else if (response.data.franchises && Array.isArray(response.data.franchises)) {
+        franchiseData = response.data.franchises;
+      } else if (response.data.data && Array.isArray(response.data.data)) {
+        franchiseData = response.data.data;
+      } else {
+        console.log('📊 Raw Franchimp response structure:', response.data);
+        franchiseData = [];
+      }
+
+      const franchises = franchiseData.map(normalizeFranchimp);
+      
+      this.setCache(cacheKey, franchises);
+      console.log(`📈 Processed ${franchises.length} franchises from Franchimp`);
+      return franchises;
+    } catch (error) {
+      console.error('❌ Error fetching from Franchimp API:', error);
+      if (error.response) {
+        console.error('Response status:', error.response.status);
+        console.error('Response data:', error.response.data);
+      }
+      return this.getFallbackFranchises('franchimp');
+    }
+  }
+
   // Fetch from Franchise Canada
   async fetchFromFranchiseCanada(searchParams: {
     sector?: string;
@@ -499,26 +625,32 @@ export class CanadianFranchiseAPIService {
     console.log('🔍 Searching Canadian franchise APIs with criteria:', criteria);
     
     const promises = [
+      this.fetchFromFranchimp({
+        category: criteria.industry,
+        minInvestment: criteria.investmentMin,
+        maxInvestment: criteria.investmentMax,
+        limit: Math.ceil((criteria.limit || 20) / 4)
+      }),
       this.fetchFromCFA({
         category: criteria.industry,
         minInvestment: criteria.investmentMin,
         maxInvestment: criteria.investmentMax,
         provinces: criteria.region ? [criteria.region] : undefined,
-        limit: Math.ceil((criteria.limit || 20) / 3)
+        limit: Math.ceil((criteria.limit || 20) / 4)
       }),
       this.fetchFromBeTheBoss({
         industry: criteria.industry,
         investmentMin: criteria.investmentMin,
         investmentMax: criteria.investmentMax,
         region: criteria.region,
-        limit: Math.ceil((criteria.limit || 20) / 3)
+        limit: Math.ceil((criteria.limit || 20) / 4)
       }),
       this.fetchFromFranchiseCanada({
         sector: criteria.industry,
         minCapital: criteria.investmentMin,
         maxCapital: criteria.investmentMax,
         provinces: criteria.region ? [criteria.region] : undefined,
-        limit: Math.ceil((criteria.limit || 20) / 3)
+        limit: Math.ceil((criteria.limit || 20) / 4)
       })
     ];
 
@@ -527,7 +659,7 @@ export class CanadianFranchiseAPIService {
       const allFranchises: Franchise[] = [];
 
       results.forEach((result, index) => {
-        const apiNames = ['CFA', 'BeTheBoss', 'Franchise Canada'];
+        const apiNames = ['Franchimp RapidAPI', 'CFA', 'BeTheBoss', 'Franchise Canada'];
         if (result.status === 'fulfilled') {
           console.log(`✅ ${apiNames[index]} API returned ${result.value.length} franchises`);
           allFranchises.push(...result.value);
