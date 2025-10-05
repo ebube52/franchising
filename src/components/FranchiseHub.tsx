@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Store, TrendingUp, Users, MapPin, DollarSign, Star, ArrowRight } from 'lucide-react';
 import { FranchiseQuiz } from './FranchiseQuiz';
 import { FranchiseResults } from './FranchiseResults';
 import { FranchiseMatchRequest } from '../types/franchise';
-import { getMatchingFranchises } from '../data/franchiseData';
+import { getMatchingFranchises } from '../services/franchiseDataService';
+import { franchiseDataService } from '../services/franchiseDataService';
 
 interface FranchiseHubProps {
   onBack: () => void;
@@ -15,11 +16,25 @@ export const FranchiseHub: React.FC<FranchiseHubProps> = ({ onBack }) => {
     matches: any[];
     criteria: FranchiseMatchRequest;
   } | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleQuizComplete = (criteria: FranchiseMatchRequest) => {
-    const matches = getMatchingFranchises(criteria);
-    setQuizResults({ matches, criteria });
-    setCurrentView('results');
+  useEffect(() => {
+    franchiseDataService.initializeCache().catch(err => {
+      console.error('Failed to initialize cache:', err);
+    });
+  }, []);
+
+  const handleQuizComplete = async (criteria: FranchiseMatchRequest) => {
+    setIsLoading(true);
+    try {
+      const matches = await getMatchingFranchises(criteria);
+      setQuizResults({ matches, criteria });
+      setCurrentView('results');
+    } catch (error) {
+      console.error('Error fetching matches:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleRetakeQuiz = () => {
@@ -29,10 +44,21 @@ export const FranchiseHub: React.FC<FranchiseHubProps> = ({ onBack }) => {
 
   if (currentView === 'quiz') {
     return (
-      <FranchiseQuiz
-        onComplete={handleQuizComplete}
-        onBack={() => setCurrentView('landing')}
-      />
+      <>
+        <FranchiseQuiz
+          onComplete={handleQuizComplete}
+          onBack={() => setCurrentView('landing')}
+        />
+        {isLoading && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl p-8 max-w-md mx-4 text-center">
+              <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent mx-auto mb-4"></div>
+              <h3 className="text-xl font-bold text-slate-900 mb-2">Finding Your Perfect Match</h3>
+              <p className="text-slate-600">Searching through thousands of franchise opportunities...</p>
+            </div>
+          </div>
+        )}
+      </>
     );
   }
 
