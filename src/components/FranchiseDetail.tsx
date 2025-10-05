@@ -1,7 +1,6 @@
-import React from 'react';
-import { ArrowLeft, ExternalLink, Phone, Mail, MapPin, DollarSign, Users, Calendar, CheckCircle, Star, TrendingUp } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Search, DollarSign, MapPin, Award, Phone, Mail, Building2, FileText } from 'lucide-react';
 import { Franchise } from '../types/franchise';
-import { FranchiseCard } from './FranchiseCard';
 
 interface FranchiseDetailProps {
   franchise: Franchise;
@@ -13,282 +12,373 @@ interface FranchiseDetailProps {
 export const FranchiseDetail: React.FC<FranchiseDetailProps> = ({
   franchise,
   onBack,
-  relatedFranchises,
-  onFranchiseSelect
 }) => {
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-CA', {
-      style: 'currency',
-      currency: 'CAD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    phone: '',
+    postalCode: '',
+    email: '',
+    investmentLevel: ''
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Form submitted:', formData);
+    alert('Thank you! A BuyersAlike franchise expert will reach out to chat about your opportunities!');
+    setFormData({
+      firstName: '',
+      lastName: '',
+      phone: '',
+      postalCode: '',
+      email: '',
+      investmentLevel: ''
+    });
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
-      {/* Navigation */}
-      <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
-        <div className="max-w-6xl mx-auto px-6 py-4">
-          <button 
-            onClick={onBack}
-            className="flex items-center gap-3 text-gray-600 hover:text-gray-900 font-medium transition-colors duration-200 group"
-          >
-            <ArrowLeft className="w-5 h-5 transition-transform duration-200 group-hover:-translate-x-1" />
-            Back to Results
-          </button>
-        </div>
-      </div>
-
-      {/* Hero Section */}
-      <div className="relative">
-        <div className="h-96 overflow-hidden">
-          <img 
-            src={franchise.image} 
-            alt={franchise.name}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-        </div>
-        
-        <div className="absolute bottom-0 left-0 right-0 p-8">
-          <div className="max-w-4xl mx-auto">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-semibold">
-                {franchise.industry}
-              </div>
-              {franchise.matchScore && (
-                <div className="bg-green-500 text-white px-4 py-2 rounded-full text-sm font-semibold">
-                  {franchise.matchScore}% Match
-                </div>
-              )}
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+      <div className="bg-white rounded-xl shadow-2xl max-w-7xl w-full my-8">
+        <div className="sticky top-0 bg-white border-b border-slate-200 px-8 py-6 rounded-t-xl z-10">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold text-slate-900">{franchise.name}</h1>
+              <p className="text-slate-600 mt-1">Franchise Opportunity</p>
             </div>
-            
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              {franchise.name}
-            </h1>
-            
-            <p className="text-xl text-white/90 mb-6 max-w-3xl">
-              {franchise.description}
-            </p>
-            
-            <div className="flex flex-wrap gap-4">
-              <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 text-white">
-                <span className="text-sm opacity-80">Est.</span>
-                <span className="font-semibold ml-1">{franchise.established}</span>
-              </div>
-              <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 text-white">
-                <span className="text-sm opacity-80">Territories:</span>
-                <span className="font-semibold ml-1">{franchise.territories.toLocaleString()}+</span>
-              </div>
-            </div>
+            <button
+              onClick={onBack}
+              className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+            >
+              <X className="w-6 h-6 text-slate-400" />
+            </button>
           </div>
         </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 p-8">
           <div className="lg:col-span-2 space-y-8">
-            {/* Investment Overview */}
-            <div className="bg-white rounded-2xl shadow-lg p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Investment Overview</h2>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-blue-50 rounded-xl p-6">
-                  <div className="flex items-center gap-3 mb-3">
-                    <DollarSign className="w-6 h-6 text-blue-600" />
-                    <h3 className="font-semibold text-blue-900">Total Investment</h3>
-                  </div>
-                  <p className="text-2xl font-bold text-blue-900">
-                    {formatCurrency(franchise.investmentMin)} - {formatCurrency(franchise.investmentMax)}
-                  </p>
-                </div>
-                
-                <div className="bg-green-50 rounded-xl p-6">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Calendar className="w-6 h-6 text-green-600" />
-                    <h3 className="font-semibold text-green-900">Franchise Fee</h3>
-                  </div>
-                  <p className="text-2xl font-bold text-green-900">
-                    {formatCurrency(franchise.franchiseFee)}
-                  </p>
-                </div>
-                
-                <div className="bg-purple-50 rounded-xl p-6">
-                  <div className="flex items-center gap-3 mb-3">
-                    <TrendingUp className="w-6 h-6 text-purple-600" />
-                    <h3 className="font-semibold text-purple-900">Royalty Fee</h3>
-                  </div>
-                  <p className="text-2xl font-bold text-purple-900">
-                    {franchise.royaltyFee}
-                  </p>
-                </div>
-                
-                <div className="bg-orange-50 rounded-xl p-6">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Users className="w-6 h-6 text-orange-600" />
-                    <h3 className="font-semibold text-orange-900">Business Model</h3>
-                  </div>
-                  <p className="text-lg font-semibold text-orange-900">
-                    {franchise.businessModel}
-                  </p>
-                </div>
+            {franchise.image && (
+              <div className="relative h-96 rounded-2xl overflow-hidden shadow-lg">
+                <img
+                  src={franchise.image}
+                  alt={franchise.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+
+            <div>
+              <h2 className="text-3xl font-bold text-slate-900 mb-4 pb-2 border-b-4 border-blue-600 inline-block">
+                {franchise.brand} Franchise
+              </h2>
+              <div className="mt-6 text-slate-700 leading-relaxed text-lg space-y-4">
+                <p>{franchise.description}</p>
+
+                <p>
+                  Founded in {franchise.established}, {franchise.brand} has over {franchise.territories} locations
+                  open and serving communities across Canada. Each franchise location operates with the company's signature
+                  systems and support, providing a proven business model for franchisees.
+                </p>
+
+                <p>
+                  {franchise.brand} is known for its {franchise.supportProvided.join(', ').toLowerCase()};
+                  and business support that helps franchisees succeed from day one.
+                </p>
               </div>
             </div>
 
-            {/* Requirements */}
-            <div className="bg-white rounded-2xl shadow-lg p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Financial Requirements</h2>
-              
+            <div>
+              <h3 className="text-2xl font-bold text-slate-900 mb-4 pb-2 border-b-4 border-blue-600 inline-block">
+                Values & History
+              </h3>
+              <div className="mt-6 text-slate-700 leading-relaxed text-lg space-y-4">
+                <p>
+                  The {franchise.brand} franchise is a proven business opportunity. Founders realized that while
+                  everyone knows what success looks like, many entrepreneurs struggle to achieve it. They believe
+                  that with the right support and systems, there is a better way to help aspiring business owners
+                  reach their goals.
+                </p>
+
+                <p>
+                  Home of comprehensive training and support programs, {franchise.brand}'s business model consists of
+                  {franchise.businessModel.toLowerCase()} operations with highly qualified support staff. {franchise.brand} is a
+                  community of franchise owners who will treat you like family.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-white border-2 border-slate-200 rounded-xl p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <Search className="w-8 h-8 text-blue-600" />
+                <h3 className="text-2xl font-bold text-slate-900">Franchisor Details</h3>
+              </div>
+              <div className="border-b-2 border-blue-600 w-32 mb-6"></div>
+
               <div className="space-y-4">
-                <div className="flex items-center justify-between py-3 border-b border-gray-100">
-                  <span className="font-medium text-gray-700">Liquid Capital Required</span>
-                  <span className="font-semibold text-gray-900">
-                    {formatCurrency(franchise.requirements.liquidCapital)}
+                <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                  <div>
+                    <span className="text-slate-600 font-medium">Incorporated Name:</span>
+                    <p className="text-blue-600 font-bold text-lg mt-1">{franchise.brand}</p>
+                  </div>
+                  <div>
+                    <span className="text-slate-600 font-medium">Total Units:</span>
+                    <p className="text-blue-600 font-bold text-lg mt-1">{franchise.territories}</p>
+                  </div>
+                  <div>
+                    <span className="text-slate-600 font-medium">Year Founded:</span>
+                    <p className="text-blue-600 font-bold text-lg mt-1">{franchise.established}</p>
+                  </div>
+                  <div>
+                    <span className="text-slate-600 font-medium">Franchising Since:</span>
+                    <p className="text-blue-600 font-bold text-lg mt-1">{franchise.established}</p>
+                  </div>
+                  <div>
+                    <span className="text-slate-600 font-medium">Training:</span>
+                    <p className="text-blue-600 font-bold text-lg mt-1">Available</p>
+                  </div>
+                  <div>
+                    <span className="text-slate-600 font-medium">Locations Available:</span>
+                    <p className="text-blue-600 font-bold text-lg mt-1">See Below*</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white border-2 border-slate-200 rounded-xl p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <DollarSign className="w-8 h-8 text-blue-600" />
+                <h3 className="text-2xl font-bold text-slate-900">Franchise Costs</h3>
+              </div>
+              <div className="border-b-2 border-blue-600 w-32 mb-6"></div>
+
+              <div className="space-y-4">
+                <div className="flex justify-between items-center py-3 border-b border-slate-200">
+                  <span className="text-slate-700 font-medium">Initial Franchise Fee</span>
+                  <span className="text-slate-900 font-bold text-lg">
+                    ${franchise.franchiseFee?.toLocaleString() || 'Contact for details'}
                   </span>
                 </div>
-                <div className="flex items-center justify-between py-3 border-b border-gray-100">
-                  <span className="font-medium text-gray-700">Net Worth Required</span>
-                  <span className="font-semibold text-gray-900">
-                    {formatCurrency(franchise.requirements.netWorth)}
+                <div className="flex justify-between items-center py-3 border-b border-slate-200">
+                  <span className="text-slate-700 font-medium">Total Investment</span>
+                  <span className="text-slate-900 font-bold text-lg">
+                    ${franchise.investmentMin?.toLocaleString()} - ${franchise.investmentMax?.toLocaleString()}
                   </span>
                 </div>
-                <div className="flex items-center justify-between py-3">
-                  <span className="font-medium text-gray-700">Experience Preferred</span>
-                  <span className="font-semibold text-gray-900">
-                    {franchise.requirements.experience}
+                <div className="flex justify-between items-center py-3 border-b border-slate-200">
+                  <span className="text-slate-700 font-medium">Royalty Fee</span>
+                  <span className="text-slate-900 font-bold text-lg">{franchise.royaltyFee}</span>
+                </div>
+                <div className="flex justify-between items-center py-3 border-b border-slate-200">
+                  <span className="text-slate-700 font-medium">Liquid Capital Required</span>
+                  <span className="text-slate-900 font-bold text-lg">
+                    ${franchise.requirements.liquidCapital?.toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center py-3">
+                  <span className="text-slate-700 font-medium">Net Worth Required</span>
+                  <span className="text-slate-900 font-bold text-lg">
+                    ${franchise.requirements.netWorth?.toLocaleString()}
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Support Provided */}
-            <div className="bg-white rounded-2xl shadow-lg p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Support & Training</h2>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-white border-2 border-slate-200 rounded-xl p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <Award className="w-8 h-8 text-blue-600" />
+                <h3 className="text-2xl font-bold text-slate-900">Support & Training</h3>
+              </div>
+              <div className="border-b-2 border-blue-600 w-32 mb-6"></div>
+
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {franchise.supportProvided.map((support, index) => (
-                  <div key={index} className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
-                    <CheckCircle className="w-5 h-5 text-green-600" />
-                    <span className="font-medium text-green-900">{support}</span>
+                  <div key={index} className="flex items-center gap-2 bg-blue-50 rounded-lg p-3">
+                    <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                    <span className="text-slate-700 font-medium">{support}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Territory Information */}
-            <div className="bg-white rounded-2xl shadow-lg p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Territory & Locations</h2>
-              
-              <div className="flex items-center gap-3 mb-4">
-                <MapPin className="w-6 h-6 text-blue-600" />
-                <div>
-                  <h3 className="font-semibold text-gray-900">Available Regions</h3>
-                  <p className="text-gray-600">{franchise.region.join(', ')}</p>
-                </div>
+            <div className="bg-white border-2 border-slate-200 rounded-xl p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <MapPin className="w-8 h-8 text-blue-600" />
+                <h3 className="text-2xl font-bold text-slate-900">Available Regions</h3>
               </div>
-              
-              <div className="bg-blue-50 rounded-lg p-4">
-                <p className="text-blue-900 font-medium">
-                  Currently operating in {franchise.territories.toLocaleString()}+ territories across Canada
-                </p>
+              <div className="border-b-2 border-blue-600 w-32 mb-6"></div>
+
+              <p className="text-slate-600 mb-4">
+                {franchise.region.join(', ')}
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-r from-blue-50 to-slate-50 rounded-xl p-6">
+              <h3 className="text-2xl font-bold text-slate-900 mb-4">Business Model</h3>
+              <div className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <Building2 className="w-5 h-5 text-blue-600 mt-1 flex-shrink-0" />
+                  <div>
+                    <span className="font-semibold text-slate-900">Type: </span>
+                    <span className="text-slate-700">{franchise.businessModel}</span>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <FileText className="w-5 h-5 text-blue-600 mt-1 flex-shrink-0" />
+                  <div>
+                    <span className="font-semibold text-slate-900">Industry: </span>
+                    <span className="text-slate-700">{franchise.industry}</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Contact Card */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 sticky top-24">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Get Started Today</h3>
-              
-              <div className="space-y-4 mb-6">
-                <div className="flex items-center gap-3">
-                  <Phone className="w-5 h-5 text-blue-600" />
+          <div className="lg:col-span-1">
+            <div className="sticky top-24">
+              <div className="bg-gradient-to-br from-orange-500 to-red-500 rounded-xl p-8 text-white shadow-2xl">
+                <h3 className="text-2xl font-bold mb-4">Schedule a Consultation</h3>
+                <div className="border-b-2 border-white/30 w-24 mb-6"></div>
+                <p className="text-white/90 mb-6 leading-relaxed">
+                  Learn more about your options for business ownership with a free, no-obligation consultation. Please enter your information below, and your BuyersAlike franchise expert will reach out to chat about your opportunities!
+                </p>
+
+                <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <p className="font-medium text-gray-900">{franchise.contactInfo.phone}</p>
-                    <p className="text-sm text-gray-600">Call for consultation</p>
+                    <label className="block text-white/90 text-sm font-medium mb-2">
+                      First name*
+                    </label>
+                    <input
+                      type="text"
+                      name="firstName"
+                      value={formData.firstName}
+                      onChange={handleChange}
+                      placeholder="First Name"
+                      required
+                      className="w-full px-4 py-3 bg-white/90 border-0 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-white/90 text-sm font-medium mb-2">
+                      Last name*
+                    </label>
+                    <input
+                      type="text"
+                      name="lastName"
+                      value={formData.lastName}
+                      onChange={handleChange}
+                      placeholder="Last name"
+                      required
+                      className="w-full px-4 py-3 bg-white/90 border-0 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-white/90 text-sm font-medium mb-2">
+                      Phone number*
+                    </label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      placeholder="(000) 000-0000"
+                      required
+                      className="w-full px-4 py-3 bg-white/90 border-0 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-white/90 text-sm font-medium mb-2">
+                      Postal code*
+                    </label>
+                    <input
+                      type="text"
+                      name="postalCode"
+                      value={formData.postalCode}
+                      onChange={handleChange}
+                      placeholder="Postal code"
+                      required
+                      className="w-full px-4 py-3 bg-white/90 border-0 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-white/90 text-sm font-medium mb-2">
+                      Email*
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="example@mail.com"
+                      required
+                      className="w-full px-4 py-3 bg-white/90 border-0 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-white/90 text-sm font-medium mb-2">
+                      Investment Level*
+                    </label>
+                    <select
+                      name="investmentLevel"
+                      value={formData.investmentLevel}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 bg-white/90 border-0 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-white"
+                    >
+                      <option value="">Please Select</option>
+                      <option value="5k-25k">$5,000 - $25,000</option>
+                      <option value="25k-100k">$25,000 - $100,000</option>
+                      <option value="100k-500k">$100,000 - $500,000</option>
+                      <option value="500k+">$500,000+</option>
+                    </select>
+                  </div>
+
+                  <p className="text-xs text-white/80 leading-relaxed">
+                    By pressing submit information, you agree that BuyersAlike may contact you by phone, email and or text message about your inquiry, which may be automated. For information on how to unsubscribe, as well as our privacy practices and commitment to protecting your privacy, check out our Privacy Policy.
+                  </p>
+
+                  <button
+                    type="submit"
+                    className="w-full py-4 bg-white text-red-600 rounded-lg font-bold text-lg hover:bg-slate-50 transition-colors shadow-lg"
+                  >
+                    Let's Talk
+                  </button>
+                </form>
+              </div>
+
+              {franchise.contactInfo && (
+                <div className="mt-6 bg-white rounded-xl p-6 border-2 border-slate-200">
+                  <h4 className="font-bold text-slate-900 mb-4">Direct Contact</h4>
+                  <div className="space-y-3">
+                    {franchise.contactInfo.phone && (
+                      <div className="flex items-center gap-3 text-slate-700">
+                        <Phone className="w-5 h-5 text-blue-600" />
+                        <span>{franchise.contactInfo.phone}</span>
+                      </div>
+                    )}
+                    {franchise.contactInfo.email && (
+                      <div className="flex items-center gap-3 text-slate-700">
+                        <Mail className="w-5 h-5 text-blue-600" />
+                        <span className="break-all">{franchise.contactInfo.email}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
-                
-                <div className="flex items-center gap-3">
-                  <Mail className="w-5 h-5 text-blue-600" />
-                  <div>
-                    <p className="font-medium text-gray-900">{franchise.contactInfo.email}</p>
-                    <p className="text-sm text-gray-600">Email for information</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="space-y-3">
-                <button className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white py-3 px-4 rounded-xl font-semibold hover:shadow-lg transition-all duration-200">
-                  Request Information
-                </button>
-                
-                <a
-                  href={franchise.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full flex items-center justify-center gap-2 border border-gray-300 text-gray-700 py-3 px-4 rounded-xl font-medium hover:bg-gray-50 transition-colors duration-200"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  Visit Website
-                </a>
-                
-                <button className="w-full bg-green-600 text-white py-3 px-4 rounded-xl font-semibold hover:bg-green-700 transition-colors duration-200">
-                  Schedule Call
-                </button>
-              </div>
+              )}
             </div>
           </div>
         </div>
       </div>
-
-      {/* Related Franchises */}
-      {relatedFranchises.length > 0 && (
-        <div className="bg-gradient-to-r from-gray-50 to-blue-50 py-16">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">Similar Opportunities</h2>
-              <p className="text-gray-600 text-lg">Other franchises that match your criteria</p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {relatedFranchises.map((relatedFranchise, index) => (
-                <div
-                  key={relatedFranchise.id}
-                  className="animate-fadeIn"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                >
-                  <FranchiseCard
-                    franchise={relatedFranchise}
-                    onLearnMore={onFranchiseSelect}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      <style jsx>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        .animate-fadeIn {
-          animation: fadeIn 0.6s ease-out forwards;
-        }
-      `}</style>
     </div>
   );
 };
