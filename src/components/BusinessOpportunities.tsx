@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import { Search, ChevronDown, Users, Calendar } from 'lucide-react';
+import { Search, ChevronDown, Users, Calendar, Building2, MessageSquare, Users2, Newspaper } from 'lucide-react';
 import { OpportunityCard } from './OpportunityCard';
 import { FranchiseDetailModal } from './FranchiseDetailModal';
 import { FranchiseQuizModal } from './FranchiseQuizModal';
+import { VendorsPage } from './VendorsPage';
 import { canadianFranchiseAPI, searchCanadianFranchises } from '../services/canadianFranchiseAPI';
 import { allCanadianFranchises } from '../data/franchiseData';
 
@@ -99,6 +100,7 @@ export const BusinessOpportunities: React.FC = () => {
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [apiOpportunities, setApiOpportunities] = useState<any[]>([]);
   const [isLoadingAPI, setIsLoadingAPI] = useState(false);
+  const [currentView, setCurrentView] = useState<'opportunities' | 'vendors' | 'messaging' | 'forum' | 'news'>('opportunities');
 
   // Load franchise data from APIs on component mount
   React.useEffect(() => {
@@ -232,26 +234,61 @@ export const BusinessOpportunities: React.FC = () => {
         </div>
         
         <nav className="space-y-2">
-          <div className="flex items-center gap-3 px-3 py-2 text-gray-300 hover:text-white hover:bg-gray-700 rounded">
+          <button
+            onClick={() => setCurrentView('opportunities')}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded transition-colors ${
+              currentView === 'opportunities'
+                ? 'bg-yellow-500 text-black font-medium'
+                : 'text-gray-300 hover:text-white hover:bg-gray-700'
+            }`}
+          >
             <Users className="w-4 h-4" />
-            <span>Partnerships</span>
-          </div>
-          <div className="flex items-center gap-3 px-3 py-2 bg-yellow-500 text-black rounded">
-            <div className="w-4 h-4 bg-black rounded-sm"></div>
-            <span className="font-medium">Opportunities</span>
-          </div>
-          <div className="flex items-center gap-3 px-3 py-2 text-gray-300 hover:text-white hover:bg-gray-700 rounded">
-            <div className="w-4 h-4"></div>
+            <span>Opportunities</span>
+          </button>
+          <button
+            onClick={() => setCurrentView('vendors')}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded transition-colors ${
+              currentView === 'vendors'
+                ? 'bg-yellow-500 text-black font-medium'
+                : 'text-gray-300 hover:text-white hover:bg-gray-700'
+            }`}
+          >
+            <Building2 className="w-4 h-4" />
+            <span>Vendors</span>
+          </button>
+          <button
+            onClick={() => setCurrentView('messaging')}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded transition-colors ${
+              currentView === 'messaging'
+                ? 'bg-yellow-500 text-black font-medium'
+                : 'text-gray-300 hover:text-white hover:bg-gray-700'
+            }`}
+          >
+            <MessageSquare className="w-4 h-4" />
             <span>Messaging</span>
-          </div>
-          <div className="flex items-center gap-3 px-3 py-2 text-gray-300 hover:text-white hover:bg-gray-700 rounded">
-            <div className="w-4 h-4"></div>
+          </button>
+          <button
+            onClick={() => setCurrentView('forum')}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded transition-colors ${
+              currentView === 'forum'
+                ? 'bg-yellow-500 text-black font-medium'
+                : 'text-gray-300 hover:text-white hover:bg-gray-700'
+            }`}
+          >
+            <Users2 className="w-4 h-4" />
             <span>Forum</span>
-          </div>
-          <div className="flex items-center gap-3 px-3 py-2 text-gray-300 hover:text-white hover:bg-gray-700 rounded">
-            <div className="w-4 h-4"></div>
+          </button>
+          <button
+            onClick={() => setCurrentView('news')}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded transition-colors ${
+              currentView === 'news'
+                ? 'bg-yellow-500 text-black font-medium'
+                : 'text-gray-300 hover:text-white hover:bg-gray-700'
+            }`}
+          >
+            <Newspaper className="w-4 h-4" />
             <span>News</span>
-          </div>
+          </button>
         </nav>
 
         <div className="absolute bottom-4 left-4 right-4 space-y-2">
@@ -276,6 +313,30 @@ export const BusinessOpportunities: React.FC = () => {
 
       {/* Main Content */}
       <div className="ml-64 p-8">
+        {currentView === 'vendors' ? (
+          <div className="-m-8">
+            <VendorsPage />
+          </div>
+        ) : currentView === 'messaging' ? (
+          <div className="text-center py-16 text-white">
+            <MessageSquare className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+            <h2 className="text-2xl font-bold mb-2">Messaging</h2>
+            <p className="text-gray-400">Coming soon...</p>
+          </div>
+        ) : currentView === 'forum' ? (
+          <div className="text-center py-16 text-white">
+            <Users2 className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+            <h2 className="text-2xl font-bold mb-2">Forum</h2>
+            <p className="text-gray-400">Coming soon...</p>
+          </div>
+        ) : currentView === 'news' ? (
+          <div className="text-center py-16 text-white">
+            <Newspaper className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+            <h2 className="text-2xl font-bold mb-2">News</h2>
+            <p className="text-gray-400">Coming soon...</p>
+          </div>
+        ) : (
+          <>
         {/* Search and Filter Section */}
         <div className="bg-white rounded-2xl p-6 mb-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
@@ -397,23 +458,25 @@ export const BusinessOpportunities: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* Modals */}
+        {selectedOpportunity && (
+          <FranchiseDetailModal
+            opportunity={selectedOpportunity}
+            onClose={() => setSelectedOpportunity(null)}
+            onPartner={handlePartner}
+          />
+        )}
+
+        {showQuizModal && (
+          <FranchiseQuizModal
+            onClose={() => setShowQuizModal(false)}
+            onComplete={handleQuizComplete}
+          />
+        )}
+          </>
+        )}
       </div>
-
-      {/* Modals */}
-      {selectedOpportunity && (
-        <FranchiseDetailModal
-          opportunity={selectedOpportunity}
-          onClose={() => setSelectedOpportunity(null)}
-          onPartner={handlePartner}
-        />
-      )}
-
-      {showQuizModal && (
-        <FranchiseQuizModal
-          onClose={() => setShowQuizModal(false)}
-          onComplete={handleQuizComplete}
-        />
-      )}
     </div>
   );
 };
