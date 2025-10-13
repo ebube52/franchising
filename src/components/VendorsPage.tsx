@@ -184,32 +184,48 @@ export const VendorsPage: React.FC = () => {
       </div>
 
       {showVendorForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="max-w-3xl w-full my-8">
-            <div className="relative">
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+          onClick={() => setShowVendorForm(false)}
+        >
+          <div
+            className="max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="relative bg-white rounded-xl shadow-2xl">
               <button
                 onClick={() => setShowVendorForm(false)}
-                className="absolute -top-4 -right-4 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-slate-100 transition-colors z-10"
+                className="sticky top-4 float-right mr-4 mt-4 w-10 h-10 bg-slate-100 hover:bg-slate-200 rounded-full shadow-lg flex items-center justify-center transition-colors z-10"
               >
                 <span className="text-2xl text-slate-600">×</span>
               </button>
-              <VendorApplicationForm />
+              <div className="clear-both">
+                <VendorApplicationForm />
+              </div>
             </div>
           </div>
         </div>
       )}
 
       {showAdvertisingForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="max-w-3xl w-full my-8">
-            <div className="relative">
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+          onClick={() => setShowAdvertisingForm(false)}
+        >
+          <div
+            className="max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="relative bg-white rounded-xl shadow-2xl">
               <button
                 onClick={() => setShowAdvertisingForm(false)}
-                className="absolute -top-4 -right-4 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-slate-100 transition-colors z-10"
+                className="sticky top-4 float-right mr-4 mt-4 w-10 h-10 bg-slate-100 hover:bg-slate-200 rounded-full shadow-lg flex items-center justify-center transition-colors z-10"
               >
                 <span className="text-2xl text-slate-600">×</span>
               </button>
-              <AdvertisingApplicationForm />
+              <div className="clear-both">
+                <AdvertisingApplicationForm />
+              </div>
             </div>
           </div>
         </div>
