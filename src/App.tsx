@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { BusinessOpportunities } from './components/BusinessOpportunities';
 import { FranchiseAPIManager } from './components/FranchiseAPIManager';
-import { Database, Home } from 'lucide-react';
+import { VendorsPage } from './components/VendorsPage';
+import { Database, Home, Building2 } from 'lucide-react';
 
 function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'admin'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'admin' | 'vendors'>('home');
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -29,6 +30,18 @@ function App() {
               </button>
 
               <button
+                onClick={() => setCurrentView('vendors')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                  currentView === 'vendors'
+                    ? 'bg-blue-600 text-white'
+                    : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <Building2 className="w-4 h-4" />
+                Vendors
+              </button>
+
+              <button
                 onClick={() => setCurrentView('admin')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                   currentView === 'admin'
@@ -44,7 +57,13 @@ function App() {
         </div>
       </nav>
 
-      {currentView === 'home' ? <BusinessOpportunities /> : <FranchiseAPIManager />}
+      {currentView === 'home' ? (
+        <BusinessOpportunities />
+      ) : currentView === 'vendors' ? (
+        <VendorsPage />
+      ) : (
+        <FranchiseAPIManager />
+      )}
     </div>
   );
 }
