@@ -6,6 +6,7 @@ import { FranchiseQuizModal } from './FranchiseQuizModal';
 import { VendorsPage } from './VendorsPage';
 import { canadianFranchiseAPI, searchCanadianFranchises } from '../services/canadianFranchiseAPI';
 import { allCanadianFranchises } from '../data/franchiseData';
+import { opportunitiesService } from '../services/opportunitiesService';
 
 // Mock data matching the image exactly
 const mockOpportunities = [
@@ -84,12 +85,17 @@ const categories = [
   'Franchises',
   'Business Opportunities',
   'Real Estate',
+  'Food & Beverage',
+  'Retail',
+  'Services',
+  'Health & Fitness',
+  'Education',
+  'Automotive',
+  'Home Services',
+  'Technology',
   'Gas Station',
   'Entertainment',
-  'Logistics',
-  'Technology',
-  'Food & Beverage',
-  'Services'
+  'Logistics'
 ];
 
 export const BusinessOpportunities: React.FC = () => {
@@ -102,24 +108,50 @@ export const BusinessOpportunities: React.FC = () => {
   const [isLoadingAPI, setIsLoadingAPI] = useState(false);
   const [currentView, setCurrentView] = useState<'opportunities' | 'vendors' | 'messaging' | 'forum' | 'news'>('opportunities');
 
-  // Load franchise data from APIs on component mount
+  // Load franchise and real estate data from database and APIs
   React.useEffect(() => {
     loadFranchiseData();
+    loadDatabaseOpportunities();
   }, []);
+
+  const loadDatabaseOpportunities = async () => {
+    try {
+      console.log('📊 Loading opportunities from database...');
+      const dbOpportunities = await opportunitiesService.getAllOpportunities();
+
+      const convertedDbOpportunities = dbOpportunities.map(opp => ({
+        id: opp.id,
+        title: opp.title,
+        image: opp.image_url || 'https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg',
+        investment: opportunitiesService.formatInvestmentRange(opp.investment_min, opp.investment_max),
+        description: opp.description,
+        postedDate: opportunitiesService.formatDate(opp.created_at),
+        partners: `${Math.floor(Math.random() * 5) + 1}/${Math.floor(Math.random() * 5) + 5} partners`,
+        type: opp.type,
+        status: 'approved' as const,
+        website: opp.website
+      }));
+
+      setApiOpportunities(prev => [...prev, ...convertedDbOpportunities]);
+      console.log(`✅ Loaded ${dbOpportunities.length} opportunities from database`);
+    } catch (error) {
+      console.error('❌ Error loading database opportunities:', error);
+    }
+  };
 
   const loadFranchiseData = async () => {
     setIsLoadingAPI(true);
     try {
       console.log('🚀 Loading Canadian franchise data from APIs...');
-      
+
       // Search all Canadian franchise APIs
       const apiResults = await searchCanadianFranchises({
         industry: 'Any Industry',
         region: 'Canada-Wide'
       });
-      
+
       console.log(`📊 Loaded ${apiResults.length} franchises from APIs`);
-      
+
       // Convert API results to opportunity format
       const convertedOpportunities = apiResults.map(franchise => ({
         id: franchise.id,
@@ -127,10 +159,10 @@ export const BusinessOpportunities: React.FC = () => {
         image: franchise.image,
         investment: `$${franchise.investmentMin.toLocaleString()}.00 - $${franchise.investmentMax.toLocaleString()}.00`,
         description: franchise.description,
-        postedDate: new Date().toLocaleDateString('en-GB', { 
-          day: 'numeric', 
-          month: 'long', 
-          year: 'numeric' 
+        postedDate: new Date().toLocaleDateString('en-GB', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric'
         }),
         partners: `${Math.floor(Math.random() * 5) + 1}/${Math.floor(Math.random() * 5) + 5} partners`,
         type: 'franchise' as const,
@@ -139,11 +171,11 @@ export const BusinessOpportunities: React.FC = () => {
         // Additional franchise-specific data
         franchiseData: franchise
       }));
-      
-      setApiOpportunities(convertedOpportunities);
+
+      setApiOpportunities(prev => [...prev, ...convertedOpportunities]);
     } catch (error) {
       console.error('❌ Error loading franchise data:', error);
-      
+
       // Fallback to local data
       const fallbackOpportunities = allCanadianFranchises.slice(0, 10).map(franchise => ({
         id: franchise.id,
@@ -151,18 +183,18 @@ export const BusinessOpportunities: React.FC = () => {
         image: franchise.image,
         investment: `$${franchise.investmentMin.toLocaleString()}.00 - $${franchise.investmentMax.toLocaleString()}.00`,
         description: franchise.description,
-        postedDate: new Date().toLocaleDateString('en-GB', { 
-          day: 'numeric', 
-          month: 'long', 
-          year: 'numeric' 
+        postedDate: new Date().toLocaleDateString('en-GB', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric'
         }),
         partners: `${Math.floor(Math.random() * 5) + 1}/${Math.floor(Math.random() * 5) + 5} partners`,
         type: 'franchise' as const,
         status: 'approved' as const,
         franchiseData: franchise
       }));
-      
-      setApiOpportunities(fallbackOpportunities);
+
+      setApiOpportunities(prev => [...prev, ...fallbackOpportunities]);
       console.log('🔄 Using fallback franchise data');
     } finally {
       setIsLoadingAPI(false);
@@ -177,10 +209,10 @@ export const BusinessOpportunities: React.FC = () => {
       const matchesSearch = opportunity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           opportunity.description.toLowerCase().includes(searchTerm.toLowerCase());
       
-      const matchesCategory = selectedCategory === 'All Categories' || 
+      const matchesCategory = selectedCategory === 'All Categories' ||
                             (selectedCategory === 'Franchises' && opportunity.type === 'franchise') ||
                             (selectedCategory === 'Business Opportunities' && opportunity.type === 'business') ||
-                            (selectedCategory === 'Real Estate' && opportunity.type === 'real-estate');
+                            (selectedCategory === 'Real Estate' && (opportunity.type === 'real_estate' || opportunity.type === 'real-estate'));
       
       return matchesSearch && matchesCategory;
     });
