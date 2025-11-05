@@ -136,12 +136,22 @@ export const BusinessOpportunities: React.FC = () => {
     return apiOpportunities.filter(opportunity => {
       const matchesSearch = opportunity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           opportunity.description.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      const matchesCategory = selectedCategory === 'All Categories' ||
-                            (selectedCategory === 'Franchises' && opportunity.type === 'franchise') ||
-                            (selectedCategory === 'Business Opportunities' && opportunity.type === 'business') ||
-                            (selectedCategory === 'Real Estate' && (opportunity.type === 'real_estate' || opportunity.type === 'real-estate'));
-      
+
+      // IMPORTANT: Real estate ONLY shows in "Real Estate" category
+      let matchesCategory = false;
+
+      if (selectedCategory === 'All Categories') {
+        // Exclude real estate from "All Categories" view
+        matchesCategory = opportunity.type !== 'real_estate';
+      } else if (selectedCategory === 'Franchises') {
+        matchesCategory = opportunity.type === 'franchise';
+      } else if (selectedCategory === 'Business Opportunities') {
+        matchesCategory = opportunity.type === 'business';
+      } else if (selectedCategory === 'Real Estate') {
+        // ONLY show real estate in this category
+        matchesCategory = opportunity.type === 'real_estate' || opportunity.type === 'real-estate';
+      }
+
       return matchesSearch && matchesCategory;
     });
   }, [searchTerm, selectedCategory, apiOpportunities]);
@@ -346,8 +356,18 @@ export const BusinessOpportunities: React.FC = () => {
               </div>
             </div>
 
-            {/* Clear Filters */}
-            <div>
+            {/* Search Status & Clear Filters */}
+            <div className="flex items-center gap-3">
+              {/* Search Status Indicator */}
+              <div className="flex items-center gap-2 px-4 py-3 bg-green-50 border-2 border-green-500 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm font-medium text-green-700">
+                    {filteredOpportunities.length} Results Found
+                  </span>
+                </div>
+              </div>
+
               <button
                 onClick={handleClearFilters}
                 className="px-6 py-3 text-gray-600 hover:text-gray-800 font-medium transition-colors"
