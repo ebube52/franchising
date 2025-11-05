@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Database, RefreshCw, Download, TrendingUp, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
+import { Database, RefreshCw, Download, TrendingUp, AlertCircle, CheckCircle, XCircle, Home } from 'lucide-react';
 import { franchiseCacheService } from '../services/franchiseCacheService';
 import { canadianFranchiseAPI } from '../services/canadianFranchiseAPI';
 import { franchiseScraperService } from '../services/franchiseScraperService';
@@ -20,16 +20,20 @@ interface CacheStats {
 }
 
 export const FranchiseAPIManager: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'apis' | 'cache' | 'scraper'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'apis' | 'cache' | 'scraper' | 'real-estate'>('overview');
   const [apiStatuses, setApiStatuses] = useState<APIStatus[]>([]);
   const [cacheStats, setCacheStats] = useState<CacheStats | null>(null);
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [syncMessage, setSyncMessage] = useState('');
+  const [realtimeStats, setRealtimeStats] = useState<any>(null);
 
   useEffect(() => {
     loadData();
-  }, []);
+    if (activeTab === 'real-estate') {
+      loadRealEstateStatus();
+    }
+  }, [activeTab]);
 
   const loadData = async () => {
     setLoading(true);
@@ -120,6 +124,63 @@ export const FranchiseAPIManager: React.FC = () => {
     setTimeout(() => setSyncMessage(''), 3000);
   };
 
+  const syncRealEstateListings = async () => {
+    setLoading(true);
+    setSyncMessage('Syncing real estate listings...');
+
+    try {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+      const response = await fetch(`${supabaseUrl}/functions/v1/sync-real-estate?action=sync`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${supabaseKey}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setSyncMessage(`✅ Synced: ${data.stats.added} added, ${data.stats.updated} updated, ${data.stats.skipped} skipped`);
+        await loadRealEstateStatus();
+      } else {
+        setSyncMessage('❌ Sync failed. Check console for details.');
+      }
+
+      setTimeout(() => setSyncMessage(''), 5000);
+    } catch (error) {
+      console.error('Error syncing real estate:', error);
+      setSyncMessage('❌ Error syncing real estate listings');
+      setTimeout(() => setSyncMessage(''), 3000);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadRealEstateStatus = async () => {
+    try {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+      const response = await fetch(`${supabaseUrl}/functions/v1/sync-real-estate?action=status`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${supabaseKey}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setRealtimeStats(data);
+      }
+    } catch (error) {
+      console.error('Error loading real estate status:', error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-12 px-4">
       <div className="max-w-7xl mx-auto">
@@ -140,6 +201,7 @@ export const FranchiseAPIManager: React.FC = () => {
                 { id: 'overview', label: 'Overview' },
                 { id: 'apis', label: 'API Status' },
                 { id: 'cache', label: 'Database Cache' },
+                { id: 'real-estate', label: 'Real Estate Sync' },
                 { id: 'scraper', label: 'Web Scraper' }
               ].map(tab => (
                 <button
@@ -362,6 +424,81 @@ export const FranchiseAPIManager: React.FC = () => {
                     </div>
                   </div>
                 )}
+              </div>
+            )}
+
+            {activeTab === 'real-estate' && (
+              <div className="space-y-6">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <Home className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <div className="text-sm text-blue-800">
+                      <p className="font-medium mb-2">Real-Time Real Estate Listings</p>
+                      <p>Automatically fetch and sync real estate listings every 3 hours. Manual sync available below.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-white border border-slate-200 rounded-xl p-6">
+                    <div className="text-3xl font-bold text-blue-600 mb-2">
+                      {realtimeStats?.count || 0}
+                    </div>
+                    <div className="text-slate-600 text-sm">Total Listings</div>
+                  </div>
+                  <div className="bg-white border border-slate-200 rounded-xl p-6">
+                    <div className="text-3xl font-bold text-green-600 mb-2">3hrs</div>
+                    <div className="text-slate-600 text-sm">Auto-Sync Interval</div>
+                  </div>
+                  <div className="bg-white border border-slate-200 rounded-xl p-6">
+                    <div className="text-3xl font-bold text-purple-600 mb-2">API</div>
+                    <div className="text-slate-600 text-sm">Data Source</div>
+                  </div>
+                </div>
+
+                <div className="bg-white border border-slate-200 rounded-xl p-6">
+                  <h3 className="text-xl font-bold text-slate-900 mb-4">Manual Sync</h3>
+                  <p className="text-slate-600 mb-4">
+                    Click the button below to manually trigger a sync of real estate listings. This will fetch the latest listings and update the database.
+                  </p>
+
+                  <button
+                    onClick={syncRealEstateListings}
+                    disabled={loading}
+                    className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+                    {loading ? 'Syncing...' : 'Sync Real Estate Listings'}
+                  </button>
+                </div>
+
+                {realtimeStats?.recent && realtimeStats.recent.length > 0 && (
+                  <div className="bg-white border border-slate-200 rounded-xl p-6">
+                    <h3 className="text-xl font-bold text-slate-900 mb-4">Recent Listings</h3>
+                    <div className="space-y-3">
+                      {realtimeStats.recent.map((listing: any) => (
+                        <div key={listing.id} className="flex justify-between items-start p-4 bg-slate-50 rounded-lg">
+                          <div>
+                            <div className="font-medium text-slate-900">{listing.title}</div>
+                            <div className="text-sm text-slate-500">Updated: {new Date(listing.updated_at).toLocaleDateString()}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-6">
+                  <h3 className="text-lg font-bold text-slate-900 mb-3">Setup Cron Job</h3>
+                  <p className="text-slate-600 text-sm mb-4">
+                    To enable automatic syncing every 3 hours, refer to the CRON_SETUP.md file in your project root for detailed instructions.
+                  </p>
+                  <div className="bg-white p-3 rounded border border-slate-200">
+                    <code className="text-xs text-slate-700">
+                      SELECT cron.schedule('sync-real-estate-listings', '0 */3 * * *', ...)
+                    </code>
+                  </div>
+                </div>
               </div>
             )}
 
