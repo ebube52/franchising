@@ -59,7 +59,16 @@ export const BusinessOpportunities: React.FC = () => {
         partners: `${Math.floor(Math.random() * 5) + 1}/${Math.floor(Math.random() * 5) + 5} partners`,
         type: opp.type,
         status: 'approved' as const,
-        website: opp.website
+        website: opp.website,
+        mlsNumber: opp.metadata?.mls_number,
+        propertyType: opp.metadata?.property_type,
+        bedrooms: opp.metadata?.bedrooms?.toString(),
+        bathrooms: opp.metadata?.bathrooms?.toString(),
+        sqft: opp.metadata?.sqft,
+        yearBuilt: opp.metadata?.year_built,
+        maintenance: opp.metadata?.maintenance,
+        taxes: opp.metadata?.taxes,
+        rentalIncome: opp.metadata?.rental_income
       }));
 
       setApiOpportunities(prev => [...prev, ...convertedDbOpportunities]);
