@@ -8,77 +8,7 @@ import { canadianFranchiseAPI, searchCanadianFranchises } from '../services/cana
 import { allCanadianFranchises } from '../data/franchiseData';
 import { opportunitiesService } from '../services/opportunitiesService';
 
-// Mock data matching the image exactly
-const mockOpportunities = [
-  {
-    id: 'nicety-franchise',
-    title: 'Nicety Franchise',
-    image: 'https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg',
-    investment: '$10000.00 - $500000.00',
-    description: 'Please approve',
-    postedDate: '21 September 2025',
-    partners: '1/5 partners',
-    type: 'franchise' as const,
-    status: 'pending'
-  },
-  {
-    id: 'renobox-opportunity',
-    title: 'Reno Box - Business Opportunity',
-    image: 'https://images.pexels.com/photos/1267338/pexels-photo-1267338.jpeg',
-    investment: '$5000.00 - $100000.00',
-    description: 'Renobox is a trade mark specializing in the rental of containers, mobile warehouses, and exhibition kiosks. Whether for your entrepreneurial or personal needs, we will find a product for you! When you choose to go into business with the Renobox opportunity, you will benefit from full start-up support as well as in the continuity of your business in light transportation according to the needs of the operator: - Market study and business plan - Funding support - Advertising program - Corporate identity: logos, lettering, business cards, promotional brochures, etc. - Comprehensive operational start-up and maintenance training',
-    postedDate: '31 August 2025',
-    partners: '1/5 partners',
-    type: 'business' as const,
-    status: 'approved',
-    website: 'https://www.canadafranchiseopportunities.ca/franchise/46-renobox-business-opportunity/'
-  },
-  // Additional franchise opportunities
-  {
-    id: 'tim-hortons-franchise',
-    title: 'Tim Hortons Franchise',
-    image: 'https://images.pexels.com/photos/302899/pexels-photo-302899.jpeg',
-    investment: '$438000.00 - $2200000.00',
-    description: 'Canada\'s iconic coffee and donut chain offering a proven business model with strong brand recognition and comprehensive support system.',
-    postedDate: '15 September 2025',
-    partners: '3/10 partners',
-    type: 'franchise' as const,
-    status: 'approved'
-  },
-  {
-    id: 'subway-franchise',
-    title: 'Subway Canada Franchise',
-    image: 'https://images.pexels.com/photos/7129052/pexels-photo-7129052.jpeg',
-    investment: '$116000.00 - $263000.00',
-    description: 'World\'s largest submarine sandwich franchise with flexible formats and strong support system for Canadian entrepreneurs.',
-    postedDate: '10 September 2025',
-    partners: '2/8 partners',
-    type: 'franchise' as const,
-    status: 'approved'
-  },
-  {
-    id: 'molly-maid-franchise',
-    title: 'Molly Maid Franchise',
-    image: 'https://images.pexels.com/photos/4239031/pexels-photo-4239031.jpeg',
-    investment: '$90000.00 - $120000.00',
-    description: 'Leading residential cleaning service franchise with home-based business model and flexible scheduling options.',
-    postedDate: '5 September 2025',
-    partners: '4/6 partners',
-    type: 'franchise' as const,
-    status: 'approved'
-  },
-  {
-    id: 'kumon-franchise',
-    title: 'Kumon Math and Reading Centers',
-    image: 'https://images.pexels.com/photos/8613089/pexels-photo-8613089.jpeg',
-    investment: '$70000.00 - $140000.00',
-    description: 'World\'s largest after-school math and reading program with proven curriculum and strong community presence.',
-    postedDate: '1 September 2025',
-    partners: '1/4 partners',
-    type: 'franchise' as const,
-    status: 'approved'
-  }
-];
+// No mock data - using only real-time API listings
 
 const categories = [
   'All Categories',
@@ -101,7 +31,7 @@ const categories = [
 export const BusinessOpportunities: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Franchises'); // Default to Franchises as shown in image
-  const [selectedOpportunity, setSelectedOpportunity] = useState<typeof mockOpportunities[0] | null>(null);
+  const [selectedOpportunity, setSelectedOpportunity] = useState<any | null>(null);
   const [showQuizModal, setShowQuizModal] = useState(false);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [apiOpportunities, setApiOpportunities] = useState<any[]>([]);
@@ -202,10 +132,8 @@ export const BusinessOpportunities: React.FC = () => {
   };
 
   const filteredOpportunities = useMemo(() => {
-    // Combine mock opportunities with API opportunities
-    const allOpportunities = [...mockOpportunities, ...apiOpportunities];
-    
-    return allOpportunities.filter(opportunity => {
+    // Use only API opportunities (no mock data)
+    return apiOpportunities.filter(opportunity => {
       const matchesSearch = opportunity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           opportunity.description.toLowerCase().includes(searchTerm.toLowerCase());
       
