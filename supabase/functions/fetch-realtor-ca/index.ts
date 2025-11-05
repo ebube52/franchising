@@ -84,6 +84,7 @@ Deno.serve(async (req: Request) => {
           const propertyType = listing.Property?.Type || 'Home';
           const rawPrice = listing.Property?.Price;
           const price = parsePrice(rawPrice);
+          const address = listing.Property?.Address?.AddressText || '';
 
           const title = bedrooms > 0 
             ? `${bedrooms}-Bedroom ${propertyType} - ${listing.Property.Address.City || cityCoords.name}`
@@ -95,6 +96,10 @@ Deno.serve(async (req: Request) => {
                          listing.Property?.Photo?.[0]?.MedResPath || 
                          'https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg';
 
+          // Create search URL using the address and MLS number
+          const searchQuery = encodeURIComponent(`${mlsNumber} ${address}`);
+          const realtorUrl = `https://www.realtor.ca/map#view=list&Query=${searchQuery}`;
+
           const opportunity = {
             title: title.substring(0, 255),
             type: 'real_estate',
@@ -103,7 +108,7 @@ Deno.serve(async (req: Request) => {
             investment_max: price,
             description: description,
             image_url: photoUrl,
-            website: `https://www.realtor.ca/real-estate/${mlsNumber}`,
+            website: realtorUrl,
             location: listing.Property?.Address?.City || cityCoords.name,
             province: getProvince(listing.Property?.Address?.Province),
             country: 'Canada',
@@ -115,7 +120,7 @@ Deno.serve(async (req: Request) => {
               bathrooms: listing.Building?.BathroomTotal || 0,
               sqft: listing.Building?.SizeInterior || '',
               property_type: listing.Property?.Type || '',
-              address: listing.Property?.Address?.AddressText || '',
+              address: address,
               postal_code: listing.Property?.Address?.PostalCode || '',
               listing_date: listing.InsertedDateUTC || '',
               last_updated: new Date().toISOString(),
