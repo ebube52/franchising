@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real Estate Listings Test</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8fafc;
+        }
+        h1 {
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+        .status {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #22c55e;
+            color: white;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        .listing {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .listing h2 {
+            color: #1e293b;
+            margin: 0 0 8px 0;
+            font-size: 20px;
+        }
+        .price {
+            color: #22c55e;
+            font-size: 24px;
+            font-weight: 700;
+            margin: 8px 0;
+        }
+        .location {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+        .category {
+            display: inline-block;
+            background: #eff6ff;
+            color: #2563eb;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+        .description {
+            color: #475569;
+            line-height: 1.6;
+            margin-top: 12px;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+        .error {
+            background: #fee;
+            color: #c00;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🏠 MLS Real Estate Listings</h1>
+    <div class="status" id="status">Loading...</div>
+    <div id="listings"></div>
+
+    <script>
+        const SUPABASE_URL = 'https://lvzxamnvtkiqjbzuwcxk.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2enhhbW52dGtpcWpienV3Y3hrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk2NzIzNTksImV4cCI6MjA3NTI0ODM1OX0.R2gQTJ2YJaD4KSRlnWks2YMJjUOu1Jf0AMb990Cxujo';
+
+        async function loadListings() {
+            const statusEl = document.getElementById('status');
+            const listingsEl = document.getElementById('listings');
+
+            try {
+                const response = await fetch(
+                    `${SUPABASE_URL}/rest/v1/opportunities?select=*&status=eq.active&type=eq.real_estate&order=investment_min.desc`,
+                    {
+                        headers: {
+                            'apikey': SUPABASE_ANON_KEY,
+                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                        }
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const listings = await response.json();
+
+                statusEl.textContent = `✅ ${listings.length} Listings Found`;
+
+                if (listings.length === 0) {
+                    listingsEl.innerHTML = '<p class="loading">No listings found in database.</p>';
+                    return;
+                }
+
+                listingsEl.innerHTML = listings.map(listing => `
+                    <div class="listing">
+                        <img src="${listing.image_url}" alt="${listing.title}">
+                        <div class="category">${listing.category}</div>
+                        <h2>${listing.title}</h2>
+                        <div class="location">📍 ${listing.location}, ${listing.province}</div>
+                        <div class="price">$${(listing.investment_min).toLocaleString()}</div>
+                        <div class="description">${listing.description}</div>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                statusEl.textContent = '❌ Error Loading';
+                listingsEl.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+                console.error('Error loading listings:', error);
+            }
+        }
+
+        // Load on page load
+        loadListings();
+    </script>
+</body>
+</html>

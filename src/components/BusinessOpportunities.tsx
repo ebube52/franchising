@@ -30,7 +30,7 @@ const categories = [
 
 export const BusinessOpportunities: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('Franchises'); // Default to Franchises as shown in image
+  const [selectedCategory, setSelectedCategory] = useState('Real Estate'); // Default to Real Estate to show MLS listings
   const [selectedOpportunity, setSelectedOpportunity] = useState<any | null>(null);
   const [showQuizModal, setShowQuizModal] = useState(false);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
