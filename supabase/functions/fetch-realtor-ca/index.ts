@@ -6,6 +6,19 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Client-Info, Apikey',
 };
 
+const RAPIDAPI_KEY = '8edbd936abmsh241dd59c094fbe0p11fbaejsn97e1916917a2';
+
+const CITY_COORDS = {
+  toronto: { latMin: 43.6, latMax: 43.8, longMin: -79.5, longMax: -79.1, name: 'Toronto' },
+  vancouver: { latMin: 49.2, latMax: 49.3, longMin: -123.2, longMax: -123.0, name: 'Vancouver' },
+  calgary: { latMin: 50.9, latMax: 51.1, longMin: -114.2, longMax: -113.9, name: 'Calgary' },
+  montreal: { latMin: 45.4, latMax: 45.6, longMin: -73.7, longMax: -73.5, name: 'Montreal' },
+  ottawa: { latMin: 45.3, latMax: 45.5, longMin: -75.8, longMax: -75.6, name: 'Ottawa' },
+  edmonton: { latMin: 53.4, latMax: 53.6, longMin: -113.6, longMax: -113.4, name: 'Edmonton' },
+  winnipeg: { latMin: 49.8, latMax: 50.0, longMin: -97.3, longMax: -97.0, name: 'Winnipeg' },
+  quebec: { latMin: 46.7, latMax: 46.9, longMin: -71.3, longMax: -71.1, name: 'Quebec City' },
+};
+
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, {
@@ -20,100 +33,105 @@ Deno.serve(async (req: Request) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const url = new URL(req.url);
-    const city = url.searchParams.get('city') || 'toronto';
-    const rapidApiKey = url.searchParams.get('apiKey');
+    const cityParam = url.searchParams.get('city')?.toLowerCase() || 'toronto';
+    const limit = parseInt(url.searchParams.get('limit') || '20');
 
-    if (!rapidApiKey) {
-      return new Response(
-        JSON.stringify({
-          error: 'RapidAPI key required',
-          message: 'Please provide your RapidAPI key to fetch live listings',
-          instructions: [
-            '1. Sign up at https://rapidapi.com',
-            '2. Subscribe to "Realty in CA" API',
-            '3. Get your API key from the API dashboard',
-            '4. Pass it as ?apiKey=YOUR_KEY parameter'
-          ]
-        }),
-        {
-          status: 400,
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-    }
+    const cityCoords = CITY_COORDS[cityParam as keyof typeof CITY_COORDS] || CITY_COORDS.toronto;
 
-    console.log(`🏠 Fetching live MLS listings for ${city}...`);
+    console.log(`🏠 Fetching live MLS listings for ${cityCoords.name}...`);
 
-    // Fetch from Realty in CA API on RapidAPI
-    const response = await fetch(
-      `https://realty-in-ca1.p.rapidapi.com/properties/list-residential?Culture=en-CA&CurrentPage=1&RecordsPerPage=20&CityName=${city}`,
-      {
-        headers: {
-          'X-RapidAPI-Key': rapidApiKey,
-          'X-RapidAPI-Host': 'realty-in-ca1.p.rapidapi.com'
-        }
+    const apiUrl = `https://realty-in-ca1.p.rapidapi.com/properties/list-residential?LatitudeMax=${cityCoords.latMax}&LatitudeMin=${cityCoords.latMin}&LongitudeMax=${cityCoords.longMax}&LongitudeMin=${cityCoords.longMin}&CurrentPage=1&RecordsPerPage=${limit}&Culture=en-CA`;
+
+    const response = await fetch(apiUrl, {
+      headers: {
+        'X-RapidAPI-Key': RAPIDAPI_KEY,
+        'X-RapidAPI-Host': 'realty-in-ca1.p.rapidapi.com'
       }
-    );
+    });
 
     if (!response.ok) {
       throw new Error(`API returned ${response.status}: ${response.statusText}`);
     }
 
     const data = await response.json();
-    console.log(`✅ Received ${data.Results?.length || 0} listings`);
+    console.log(`✅ Received ${data.Results?.length || 0} listings from API`);
 
-    // Transform and save to database
     let addedCount = 0;
     let skippedCount = 0;
 
     if (data.Results && Array.isArray(data.Results)) {
-      for (const listing of data.Results.slice(0, 20)) {
+      for (const listing of data.Results) {
         try {
           const mlsNumber = listing.MlsNumber || listing.Id;
           
-          // Check if listing already exists
+          if (!listing.Property?.Address) {
+            skippedCount++;
+            continue;
+          }
+
           const { data: existing } = await supabase
             .from('opportunities')
             .select('id')
             .eq('metadata->>mls_number', mlsNumber)
             .maybeSingle();
 
-          if (!existing && listing.Property?.Address) {
-            const opportunity = {
-              title: `${listing.Building?.BedroomsTotal || ''}-Bedroom ${listing.Property?.Type || 'Home'} - ${listing.Property.Address.AddressText || ''}`,
-              type: 'real_estate',
-              category: getPropertyCategory(listing.Property?.Type),
-              investment_min: listing.Property?.Price || 0,
-              investment_max: listing.Property?.Price || 0,
-              description: generateDescription(listing),
-              image_url: listing.Property?.Photo?.[0]?.HighResPath || listing.Property?.Photo?.[0]?.MedResPath || 'https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg',
-              website: `https://www.realtor.ca/real-estate/${mlsNumber}`,
-              location: listing.Property?.Address?.City || city,
-              province: getProvince(listing.Property?.Address?.Province),
-              country: 'Canada',
-              status: 'active',
-              source: 'realty_in_ca',
-              metadata: {
-                mls_number: mlsNumber,
-                bedrooms: listing.Building?.BedroomsTotal,
-                bathrooms: listing.Building?.BathroomTotal,
-                sqft: listing.Building?.SizeInterior,
-                property_type: listing.Property?.Type,
-                address: listing.Property?.Address?.AddressText,
-                postal_code: listing.Property?.Address?.PostalCode,
-                listing_date: listing.InsertedDateUTC,
-                last_updated: new Date().toISOString(),
-                live_listing: true,
-              },
-            };
-
-            await supabase.from('opportunities').insert([opportunity]);
-            addedCount++;
-          } else {
+          if (existing) {
             skippedCount++;
+            continue;
+          }
+
+          const bedrooms = listing.Building?.BedroomsTotal || 0;
+          const propertyType = listing.Property?.Type || 'Home';
+          const rawPrice = listing.Property?.Price;
+          const price = parsePrice(rawPrice);
+
+          const title = bedrooms > 0 
+            ? `${bedrooms}-Bedroom ${propertyType} - ${listing.Property.Address.City || cityCoords.name}`
+            : `${propertyType} - ${listing.Property.Address.City || cityCoords.name}`;
+
+          const description = generateDescription(listing);
+          
+          const photoUrl = listing.Property?.Photo?.[0]?.HighResPath || 
+                         listing.Property?.Photo?.[0]?.MedResPath || 
+                         'https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg';
+
+          const opportunity = {
+            title: title.substring(0, 255),
+            type: 'real_estate',
+            category: getPropertyCategory(listing.Property?.Type),
+            investment_min: price,
+            investment_max: price,
+            description: description,
+            image_url: photoUrl,
+            website: `https://www.realtor.ca/real-estate/${mlsNumber}`,
+            location: listing.Property?.Address?.City || cityCoords.name,
+            province: getProvince(listing.Property?.Address?.Province),
+            country: 'Canada',
+            status: 'active',
+            source: 'realty_in_ca',
+            metadata: {
+              mls_number: mlsNumber,
+              bedrooms: listing.Building?.BedroomsTotal || 0,
+              bathrooms: listing.Building?.BathroomTotal || 0,
+              sqft: listing.Building?.SizeInterior || '',
+              property_type: listing.Property?.Type || '',
+              address: listing.Property?.Address?.AddressText || '',
+              postal_code: listing.Property?.Address?.PostalCode || '',
+              listing_date: listing.InsertedDateUTC || '',
+              last_updated: new Date().toISOString(),
+              live_listing: true,
+              public_remarks: (listing.PublicRemarks || '').substring(0, 500),
+            },
+          };
+
+          const { error: insertError } = await supabase
+            .from('opportunities')
+            .insert([opportunity]);
+
+          if (insertError) {
+            console.error(`Insert error for ${mlsNumber}:`, insertError);
+          } else {
+            addedCount++;
           }
         } catch (listingError) {
           console.error('Error processing listing:', listingError);
@@ -126,13 +144,14 @@ Deno.serve(async (req: Request) => {
     return new Response(
       JSON.stringify({
         success: true,
-        message: 'Live MLS listings fetched',
+        message: 'Live MLS listings fetched from Realtor.ca',
         stats: {
           added: addedCount,
           skipped: skippedCount,
           total: data.Results?.length || 0,
+          totalAvailable: data.Paging?.TotalRecords || 0,
         },
-        city: city,
+        city: cityCoords.name,
         timestamp: new Date().toISOString(),
       }),
       {
@@ -147,7 +166,7 @@ Deno.serve(async (req: Request) => {
     return new Response(
       JSON.stringify({ 
         error: error.message,
-        details: 'Failed to fetch live MLS listings. Check your RapidAPI key and subscription.' 
+        details: 'Failed to fetch live MLS listings from Realtor.ca API' 
       }),
       {
         status: 500,
@@ -160,14 +179,24 @@ Deno.serve(async (req: Request) => {
   }
 });
 
+function parsePrice(price: any): number {
+  if (typeof price === 'number') return price;
+  if (!price) return 0;
+  
+  const priceStr = String(price).replace(/[^0-9.]/g, '');
+  const parsed = parseFloat(priceStr);
+  return isNaN(parsed) ? 0 : parsed;
+}
+
 function getPropertyCategory(propertyType: string | undefined): string {
   if (!propertyType) return 'Single Family Home';
   
   const type = propertyType.toLowerCase();
   if (type.includes('condo') || type.includes('apartment')) return 'Condo';
   if (type.includes('townhouse') || type.includes('town')) return 'Townhouse';
-  if (type.includes('duplex') || type.includes('triplex') || type.includes('multiplex')) return 'Multi-Family';
-  if (type.includes('land') || type.includes('lot')) return 'Land';
+  if (type.includes('duplex') || type.includes('triplex') || type.includes('fourplex')) return 'Multi-Family';
+  if (type.includes('land') || type.includes('lot') || type.includes('vacant')) return 'Land';
+  if (type.includes('commercial') || type.includes('office') || type.includes('retail')) return 'Commercial';
   
   return 'Single Family Home';
 }
@@ -196,24 +225,25 @@ function generateDescription(listing: any): string {
   const parts = [];
   
   if (listing.Building?.BedroomsTotal) {
-    parts.push(`${listing.Building.BedroomsTotal}-bedroom`);
+    parts.push(`${listing.Building.BedroomsTotal} bedroom`);
   }
   if (listing.Building?.BathroomTotal) {
-    parts.push(`${listing.Building.BathroomTotal}-bathroom`);
+    parts.push(`${listing.Building.BathroomTotal} bathroom`);
   }
   
-  parts.push(listing.Property?.Type || 'home');
+  parts.push(listing.Property?.Type || 'property');
   
   if (listing.Property?.Address?.AddressText) {
-    parts.push(`located at ${listing.Property.Address.AddressText}`);
+    parts.push(`at ${listing.Property.Address.AddressText}`);
   }
   
   if (listing.Building?.SizeInterior) {
-    parts.push(`with ${listing.Building.SizeInterior} sq ft of living space`);
+    parts.push(`with ${listing.Building.SizeInterior} of living space`);
   }
   
   if (listing.PublicRemarks) {
-    parts.push(listing.PublicRemarks.substring(0, 200));
+    const remarks = listing.PublicRemarks.substring(0, 300).trim();
+    parts.push(remarks);
   }
   
   parts.push(`MLS# ${listing.MlsNumber || listing.Id}`);
