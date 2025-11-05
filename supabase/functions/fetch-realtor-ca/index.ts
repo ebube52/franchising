@@ -17,6 +17,8 @@ const CITY_COORDS = {
   edmonton: { latMin: 53.4, latMax: 53.6, longMin: -113.6, longMax: -113.4, name: 'Edmonton' },
   winnipeg: { latMin: 49.8, latMax: 50.0, longMin: -97.3, longMax: -97.0, name: 'Winnipeg' },
   quebec: { latMin: 46.7, latMax: 46.9, longMin: -71.3, longMax: -71.1, name: 'Quebec City' },
+  kelowna: { latMin: 49.8, latMax: 50.0, longMin: -119.6, longMax: -119.3, name: 'Kelowna' },
+  victoria: { latMin: 48.4, latMax: 48.5, longMin: -123.4, longMax: -123.3, name: 'Victoria' },
 };
 
 Deno.serve(async (req: Request) => {
@@ -63,6 +65,7 @@ Deno.serve(async (req: Request) => {
       for (const listing of data.Results) {
         try {
           const mlsNumber = listing.MlsNumber || listing.Id;
+          const propertyId = listing.Id;
           
           if (!listing.Property?.Address) {
             skippedCount++;
@@ -85,10 +88,12 @@ Deno.serve(async (req: Request) => {
           const rawPrice = listing.Property?.Price;
           const price = parsePrice(rawPrice);
           const address = listing.Property?.Address?.AddressText || '';
+          const city = listing.Property?.Address?.City || cityCoords.name;
+          const postalCode = listing.Property?.Address?.PostalCode || '';
 
           const title = bedrooms > 0 
-            ? `${bedrooms}-Bedroom ${propertyType} - ${listing.Property.Address.City || cityCoords.name}`
-            : `${propertyType} - ${listing.Property.Address.City || cityCoords.name}`;
+            ? `${bedrooms}-Bedroom ${propertyType} - ${city}`
+            : `${propertyType} - ${city}`;
 
           const description = generateDescription(listing);
           
@@ -96,9 +101,12 @@ Deno.serve(async (req: Request) => {
                          listing.Property?.Photo?.[0]?.MedResPath || 
                          'https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg';
 
-          // Create search URL using the address and MLS number
-          const searchQuery = encodeURIComponent(`${mlsNumber} ${address}`);
-          const realtorUrl = `https://www.realtor.ca/map#view=list&Query=${searchQuery}`;
+          // Create proper Realtor.ca URL using property ID and address
+          const addressSlug = address.toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+          const citySlug = city.toLowerCase().replace(/\s+/g, '-');
+          const realtorUrl = `https://www.realtor.ca/real-estate/${propertyId}/${addressSlug}-${citySlug}`;
 
           const opportunity = {
             title: title.substring(0, 255),
@@ -109,19 +117,20 @@ Deno.serve(async (req: Request) => {
             description: description,
             image_url: photoUrl,
             website: realtorUrl,
-            location: listing.Property?.Address?.City || cityCoords.name,
+            location: city,
             province: getProvince(listing.Property?.Address?.Province),
             country: 'Canada',
             status: 'active',
             source: 'realty_in_ca',
             metadata: {
+              property_id: propertyId,
               mls_number: mlsNumber,
               bedrooms: listing.Building?.BedroomsTotal || 0,
               bathrooms: listing.Building?.BathroomTotal || 0,
               sqft: listing.Building?.SizeInterior || '',
               property_type: listing.Property?.Type || '',
               address: address,
-              postal_code: listing.Property?.Address?.PostalCode || '',
+              postal_code: postalCode,
               listing_date: listing.InsertedDateUTC || '',
               last_updated: new Date().toISOString(),
               live_listing: true,
@@ -136,6 +145,7 @@ Deno.serve(async (req: Request) => {
           if (insertError) {
             console.error(`Insert error for ${mlsNumber}:`, insertError);
           } else {
+            console.log(`✅ Added: ${title} - ${realtorUrl}`);
             addedCount++;
           }
         } catch (listingError) {
