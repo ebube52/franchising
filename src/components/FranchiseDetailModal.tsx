@@ -143,18 +143,17 @@ export const FranchiseDetailModal: React.FC<FranchiseDetailModalProps> = ({
           {/* Source Link */}
           {opportunity.website && (
             <div className="mb-6">
-              <div className="flex items-center gap-2 text-blue-600">
-                <span className="text-sm">🔗</span>
-                <span className="text-sm">Source: </span>
-                <a
-                  href={opportunity.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 underline cursor-pointer"
-                >
-                  View Franchise Details
-                </a>
-              </div>
+              <a
+                href={opportunity.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold hover:shadow-lg transition-all duration-200 transform hover:scale-105 text-center"
+              >
+                {opportunity.type === 'real-estate' ? '🏢 View Property Listing' : '🔗 View Franchise Website'}
+              </a>
+              <p className="text-xs text-gray-500 text-center mt-2">
+                Opens in new window
+              </p>
             </div>
           )}
 

@@ -127,13 +127,25 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({ opportunity, o
           </p>
         )}
 
-        {/* Learn More Button */}
-        <button 
-          onClick={onLearnMore}
-          className="w-full mb-4 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg font-medium hover:shadow-lg transition-all duration-200 transform hover:scale-105"
-        >
-          Learn More & Contact
-        </button>
+        {/* Action Buttons */}
+        <div className="space-y-2 mb-4">
+          {opportunity.type === 'real-estate' && opportunity.website && (
+            <a
+              href={opportunity.website}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg font-medium hover:shadow-lg transition-all duration-200 transform hover:scale-105 text-center"
+            >
+              🏢 View Property Listing
+            </a>
+          )}
+          <button
+            onClick={onLearnMore}
+            className="w-full px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg font-medium hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+          >
+            Learn More & Contact
+          </button>
+        </div>
 
         {/* Footer */}
         <div className="flex items-center justify-between text-sm text-gray-500 pt-4 border-t border-gray-100">
