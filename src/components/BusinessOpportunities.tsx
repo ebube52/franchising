@@ -378,6 +378,49 @@ export const BusinessOpportunities: React.FC = () => {
           </div>
         </div>
 
+        {/* Real-Time Listings Info Banner */}
+        {selectedCategory === 'Real Estate' && (
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-6 mb-6">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0">
+                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-2xl">🏠</span>
+                </div>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-gray-900 mb-2">Enable Live MLS Listings from Realtor.ca</h3>
+                <p className="text-gray-700 mb-3">
+                  Get real-time residential listings with current prices, photos, and details from the official Canadian MLS system.
+                </p>
+                <div className="bg-white rounded-lg p-4 mb-3">
+                  <p className="text-sm font-semibold text-gray-800 mb-2">Quick Setup (3 steps):</p>
+                  <ol className="text-sm text-gray-700 space-y-1 list-decimal list-inside">
+                    <li>Sign up at <a href="https://rapidapi.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-medium">RapidAPI.com</a> (free)</li>
+                    <li>Subscribe to "Realty in CA" API (100 free requests/month)</li>
+                    <li>Use your API key to fetch live listings for any Canadian city</li>
+                  </ol>
+                </div>
+                <div className="flex gap-3">
+                  <a
+                    href="https://rapidapi.com/apidojo/api/realty-in-ca1"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm transition-colors"
+                  >
+                    Get API Access
+                  </a>
+                  <button
+                    onClick={() => window.open('/REALTIME_LISTINGS_SETUP.md', '_blank')}
+                    className="px-4 py-2 bg-white border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 font-medium text-sm transition-colors"
+                  >
+                    View Setup Guide
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Opportunities Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {isLoadingAPI && (
