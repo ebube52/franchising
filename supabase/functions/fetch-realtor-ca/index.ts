@@ -19,6 +19,18 @@ const CITY_COORDS = {
   quebec: { latMin: 46.7, latMax: 46.9, longMin: -71.3, longMax: -71.1, name: 'Quebec City' },
   kelowna: { latMin: 49.8, latMax: 50.0, longMin: -119.6, longMax: -119.3, name: 'Kelowna' },
   victoria: { latMin: 48.4, latMax: 48.5, longMin: -123.4, longMax: -123.3, name: 'Victoria' },
+  pickering: { latMin: 43.8, latMax: 43.9, longMin: -79.1, longMax: -78.8, name: 'Pickering' },
+  ajax: { latMin: 43.8, latMax: 43.9, longMin: -79.1, longMax: -78.9, name: 'Ajax' },
+  whitby: { latMin: 43.8, latMax: 44.0, longMin: -78.95, longMax: -78.85, name: 'Whitby' },
+  oshawa: { latMin: 43.8, latMax: 44.0, longMin: -78.9, longMax: -78.7, name: 'Oshawa' },
+  mississauga: { latMin: 43.5, latMax: 43.7, longMin: -79.7, longMax: -79.5, name: 'Mississauga' },
+  brampton: { latMin: 43.6, latMax: 43.8, longMin: -79.8, longMax: -79.6, name: 'Brampton' },
+  markham: { latMin: 43.8, latMax: 43.9, longMin: -79.4, longMax: -79.2, name: 'Markham' },
+  vaughan: { latMin: 43.8, latMax: 43.9, longMin: -79.6, longMax: -79.4, name: 'Vaughan' },
+  hamilton: { latMin: 43.2, latMax: 43.3, longMin: -79.9, longMax: -79.7, name: 'Hamilton' },
+  london: { latMin: 42.9, latMax: 43.0, longMin: -81.3, longMax: -81.1, name: 'London' },
+  kitchener: { latMin: 43.4, latMax: 43.5, longMin: -80.6, longMax: -80.4, name: 'Kitchener' },
+  guelph: { latMin: 43.5, latMax: 43.6, longMin: -80.3, longMax: -80.1, name: 'Guelph' },
 };
 
 Deno.serve(async (req: Request) => {
