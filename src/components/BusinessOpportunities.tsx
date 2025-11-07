@@ -192,9 +192,11 @@ export const BusinessOpportunities: React.FC = () => {
         matchesCategory = oppType === 'franchise' || oppType === 'business';
       } else if (selectedCategory === 'Franchises') {
         // ONLY franchises - be very strict
-        matchesCategory = oppType === 'franchise';
+        // Explicitly exclude real_estate, real-estate, and any type that contains "real"
+        const isRealEstate = oppType.includes('real');
+        matchesCategory = oppType === 'franchise' && !isRealEstate;
         if (matchesSearch && !matchesCategory) {
-          console.log('🚫 BLOCKING real estate from Franchises:', opportunity.title, 'type:', `"${oppType}"`);
+          console.log('🚫 BLOCKING from Franchises:', opportunity.title, 'type:', `"${oppType}"`, 'isRealEstate:', isRealEstate);
         }
       } else if (selectedCategory === 'Business Opportunities') {
         // ONLY business opportunities
@@ -639,14 +641,14 @@ export const BusinessOpportunities: React.FC = () => {
 
         {/* Sticky Bottom Bar */}
         {selectedFranchises.size > 0 && (
-          <div className="fixed bottom-0 left-64 right-0 bg-red-800 text-white py-4 px-8 shadow-lg z-40">
+          <div className="fixed bottom-0 left-64 right-0 bg-blue-600 text-white py-4 px-8 shadow-lg z-40">
             <div className="max-w-7xl mx-auto flex items-center justify-between">
               <span className="text-lg font-semibold">
                 {selectedFranchises.size} franchise(s) selected
               </span>
               <button
                 onClick={() => setShowRequestForm(true)}
-                className="px-6 py-2 bg-gray-900 text-white rounded font-semibold hover:bg-gray-800 transition-colors"
+                className="px-6 py-2 bg-white text-blue-600 rounded font-semibold hover:bg-gray-100 transition-colors"
               >
                 Complete request
               </button>
