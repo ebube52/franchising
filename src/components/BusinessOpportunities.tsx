@@ -151,7 +151,7 @@ export const BusinessOpportunities: React.FC = () => {
     console.log('🔍 Filtering opportunities:', {
       category: selectedCategory,
       totalOpportunities: apiOpportunities.length,
-      types: apiOpportunities.map(o => o.type)
+      sampleTypes: apiOpportunities.slice(0, 5).map(o => ({ title: o.title, type: o.type }))
     });
 
     // Use only API opportunities (no mock data)
@@ -159,9 +159,9 @@ export const BusinessOpportunities: React.FC = () => {
       const matchesSearch = opportunity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           opportunity.description.toLowerCase().includes(searchTerm.toLowerCase());
 
-      // Category filtering
+      // Category filtering - STRICT TYPE CHECKING
       let matchesCategory = false;
-      const oppType = opportunity.type?.toLowerCase() || '';
+      const oppType = opportunity.type?.toLowerCase()?.trim() || '';
 
       if (selectedCategory === 'All Categories') {
         // Show only franchises and business opportunities (exclude real estate)
@@ -169,6 +169,9 @@ export const BusinessOpportunities: React.FC = () => {
       } else if (selectedCategory === 'Franchises') {
         // ONLY franchises - be very strict
         matchesCategory = oppType === 'franchise';
+        if (matchesSearch && !matchesCategory) {
+          console.log('🚫 BLOCKING real estate from Franchises:', opportunity.title, 'type:', `"${oppType}"`);
+        }
       } else if (selectedCategory === 'Business Opportunities') {
         // ONLY business opportunities
         matchesCategory = oppType === 'business';
@@ -182,15 +185,13 @@ export const BusinessOpportunities: React.FC = () => {
                          opportunity.category === selectedCategory;
       }
 
-      const passes = matchesSearch && matchesCategory;
-      if (!passes && selectedCategory === 'Franchises') {
-        console.log('❌ Filtered out:', opportunity.title, 'type:', oppType);
-      }
-
-      return passes;
+      return matchesSearch && matchesCategory;
     });
 
-    console.log(`✅ Filtered to ${filtered.length} opportunities for category: ${selectedCategory}`);
+    console.log(`✅ Filtered to ${filtered.length} opportunities for category: "${selectedCategory}"`);
+    if (selectedCategory === 'Franchises') {
+      console.log('📊 Franchise types in filtered results:', filtered.map(f => f.type));
+    }
     return filtered;
   }, [searchTerm, selectedCategory, apiOpportunities]);
 
