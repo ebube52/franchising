@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, Filter, RefreshCw, Star, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Filter, RefreshCw, Star, TrendingUp, Search } from 'lucide-react';
 import { Franchise, FranchiseMatchRequest } from '../types/franchise';
 import { FranchiseCard } from './FranchiseCard';
 import { FranchiseDetail } from './FranchiseDetail';
@@ -18,6 +18,18 @@ export const FranchiseResults: React.FC<FranchiseResultsProps> = ({
   onRetakeQuiz
 }) => {
   const [selectedFranchise, setSelectedFranchise] = React.useState<Franchise | null>(null);
+  const [searchTerm, setSearchTerm] = React.useState('');
+
+  const filteredMatches = React.useMemo(() => {
+    if (!searchTerm.trim()) return matches;
+
+    const lowerSearch = searchTerm.toLowerCase();
+    return matches.filter(franchise =>
+      franchise.name.toLowerCase().includes(lowerSearch) ||
+      franchise.description.toLowerCase().includes(lowerSearch) ||
+      franchise.industry.toLowerCase().includes(lowerSearch)
+    );
+  }, [matches, searchTerm]);
 
   if (selectedFranchise) {
     return (
@@ -83,13 +95,28 @@ export const FranchiseResults: React.FC<FranchiseResultsProps> = ({
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Search Bar */}
+        <div className="mb-6">
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input
+              type="text"
+              placeholder="Search franchises by name, description, or industry..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-400"
+            />
+          </div>
+        </div>
+
         {/* Action Bar */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 text-gray-600">
               <TrendingUp className="w-5 h-5" />
               <span className="font-medium">
-                {matches.length} franchise{matches.length !== 1 ? 's' : ''} found
+                {filteredMatches.length} franchise{filteredMatches.length !== 1 ? 's' : ''} found
+                {searchTerm && ` (filtered from ${matches.length})`}
               </span>
             </div>
             <div className="text-sm text-gray-500">
@@ -113,9 +140,9 @@ export const FranchiseResults: React.FC<FranchiseResultsProps> = ({
         </div>
 
         {/* Results Grid */}
-        {matches.length > 0 ? (
+        {filteredMatches.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {matches.map((franchise, index) => (
+            {filteredMatches.map((franchise, index) => (
               <div
                 key={franchise.id}
                 className="animate-fadeIn"
@@ -131,18 +158,37 @@ export const FranchiseResults: React.FC<FranchiseResultsProps> = ({
         ) : (
           <div className="text-center py-16">
             <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
-              <Star className="w-8 h-8 text-blue-500" />
+              {searchTerm ? (
+                <Search className="w-8 h-8 text-blue-500" />
+              ) : (
+                <Star className="w-8 h-8 text-blue-500" />
+              )}
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No matches found</h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              {searchTerm ? 'No franchises match your search' : 'No matches found'}
+            </h3>
             <p className="text-gray-600 mb-6">
-              Try adjusting your criteria to see more franchise opportunities
+              {searchTerm
+                ? 'Try different keywords or clear your search to see all results'
+                : 'Try adjusting your criteria to see more franchise opportunities'
+              }
             </p>
-            <button
-              onClick={onRetakeQuiz}
-              className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl font-medium hover:shadow-lg transition-all duration-200"
-            >
-              Retake Quiz
-            </button>
+            <div className="flex gap-3 justify-center">
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="px-6 py-3 bg-white border-2 border-blue-500 text-blue-600 rounded-xl font-medium hover:bg-blue-50 transition-all duration-200"
+                >
+                  Clear Search
+                </button>
+              )}
+              <button
+                onClick={onRetakeQuiz}
+                className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl font-medium hover:shadow-lg transition-all duration-200"
+              >
+                Retake Quiz
+              </button>
+            </div>
           </div>
         )}
 
