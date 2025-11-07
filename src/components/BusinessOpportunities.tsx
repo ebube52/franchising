@@ -80,6 +80,11 @@ export const BusinessOpportunities: React.FC = () => {
 
       setApiOpportunities(prev => [...prev, ...convertedDbOpportunities]);
       console.log(`✅ Loaded ${dbOpportunities.length} opportunities from database`);
+      console.log('📊 Sample of loaded data:', convertedDbOpportunities.slice(0, 3).map(o => ({
+        title: o.title,
+        type: o.type,
+        category: o.category
+      })));
     } catch (error) {
       console.error('❌ Error loading database opportunities:', error);
     }
@@ -397,6 +402,11 @@ export const BusinessOpportunities: React.FC = () => {
 
             {/* Search Status & Clear Filters */}
             <div className="flex items-center gap-3">
+              {/* DEBUG: Show actual state */}
+              <div className="px-3 py-2 bg-blue-100 rounded text-xs">
+                State: {selectedCategory} | Results: {filteredOpportunities.length}
+              </div>
+
               {/* Search Status Indicator */}
               <div className="flex items-center gap-2 px-4 py-3 bg-green-50 border-2 border-green-500 rounded-lg">
                 <div className="flex items-center gap-2">
