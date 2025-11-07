@@ -195,8 +195,13 @@ export const BusinessOpportunities: React.FC = () => {
         // Explicitly exclude real_estate, real-estate, and any type that contains "real"
         const isRealEstate = oppType.includes('real');
         matchesCategory = oppType === 'franchise' && !isRealEstate;
-        if (matchesSearch && !matchesCategory) {
-          console.log('🚫 BLOCKING from Franchises:', opportunity.title, 'type:', `"${oppType}"`, 'isRealEstate:', isRealEstate);
+
+        // Log ALL items being evaluated for Franchises category
+        if (isRealEstate) {
+          console.log('🚫 BLOCKING real estate from Franchises:', opportunity.title, 'type:', `"${oppType}"`);
+        }
+        if (oppType === 'franchise' && !isRealEstate) {
+          console.log('✅ ALLOWING franchise:', opportunity.title);
         }
       } else if (selectedCategory === 'Business Opportunities') {
         // ONLY business opportunities
@@ -216,7 +221,10 @@ export const BusinessOpportunities: React.FC = () => {
 
     console.log(`✅ Filtered to ${filtered.length} opportunities for category: "${selectedCategory}"`);
     if (selectedCategory === 'Franchises') {
-      console.log('📊 Franchise types in filtered results:', filtered.map(f => f.type));
+      console.log('📊 Franchise types in filtered results:', filtered.map(f => ({ title: f.title, type: f.type })));
+      console.log('🚨 DEBUGGING: Total opportunities before filter:', apiOpportunities.length);
+      console.log('🚨 DEBUGGING: Real estate in source:', apiOpportunities.filter(o => o.type?.toLowerCase().includes('real')).length);
+      console.log('🚨 DEBUGGING: Franchises in source:', apiOpportunities.filter(o => o.type?.toLowerCase() === 'franchise').length);
     }
     return filtered;
   }, [searchTerm, selectedCategory, apiOpportunities]);
