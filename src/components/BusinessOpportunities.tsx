@@ -153,19 +153,26 @@ export const BusinessOpportunities: React.FC = () => {
       const matchesSearch = opportunity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           opportunity.description.toLowerCase().includes(searchTerm.toLowerCase());
 
-      // IMPORTANT: Real estate ONLY shows in "Real Estate" category
+      // Category filtering
       let matchesCategory = false;
 
       if (selectedCategory === 'All Categories') {
-        // Exclude real estate from "All Categories" view
-        matchesCategory = opportunity.type !== 'real_estate';
+        // Show only franchises and business opportunities (exclude real estate)
+        matchesCategory = opportunity.type === 'franchise' || opportunity.type === 'business';
       } else if (selectedCategory === 'Franchises') {
+        // ONLY franchises
         matchesCategory = opportunity.type === 'franchise';
       } else if (selectedCategory === 'Business Opportunities') {
+        // ONLY business opportunities
         matchesCategory = opportunity.type === 'business';
       } else if (selectedCategory === 'Real Estate') {
-        // ONLY show real estate in this category
+        // ONLY real estate
         matchesCategory = opportunity.type === 'real_estate' || opportunity.type === 'real-estate';
+      } else {
+        // Industry-specific categories (Food & Beverage, Retail, etc.)
+        // These should ONLY show franchises with matching category
+        matchesCategory = opportunity.type === 'franchise' &&
+                         opportunity.category === selectedCategory;
       }
 
       return matchesSearch && matchesCategory;
