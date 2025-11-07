@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Search, ChevronDown, Users, Calendar, Building2, MessageSquare, Users2, Newspaper } from 'lucide-react';
 import { OpportunityCard } from './OpportunityCard';
+import { FranchiseOpportunityCard } from './FranchiseOpportunityCard';
 import { FranchiseDetailModal } from './FranchiseDetailModal';
 import { FranchiseQuizModal } from './FranchiseQuizModal';
 import { VendorsPage } from './VendorsPage';
@@ -481,13 +482,23 @@ export const BusinessOpportunities: React.FC = () => {
             </div>
           )}
           
-          {filteredOpportunities.map((opportunity) => (
-            <OpportunityCard
-              key={opportunity.id}
-              opportunity={opportunity}
-              onLearnMore={() => setSelectedOpportunity(opportunity)}
-            />
-          ))}
+          {filteredOpportunities.map((opportunity) => {
+            const isFranchise = opportunity.type?.toLowerCase() === 'franchise';
+
+            return isFranchise ? (
+              <FranchiseOpportunityCard
+                key={opportunity.id}
+                opportunity={opportunity}
+                onLearnMore={() => setSelectedOpportunity(opportunity)}
+              />
+            ) : (
+              <OpportunityCard
+                key={opportunity.id}
+                opportunity={opportunity}
+                onLearnMore={() => setSelectedOpportunity(opportunity)}
+              />
+            );
+          })}
         </div>
 
         {/* API Status Indicator */}
