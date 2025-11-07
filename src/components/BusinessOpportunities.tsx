@@ -60,6 +60,7 @@ export const BusinessOpportunities: React.FC = () => {
         type: opp.type,
         status: 'approved' as const,
         website: opp.website,
+        // Real estate metadata
         mlsNumber: opp.metadata?.mls_number,
         propertyType: opp.metadata?.property_type,
         bedrooms: opp.metadata?.bedrooms?.toString(),
@@ -68,7 +69,13 @@ export const BusinessOpportunities: React.FC = () => {
         yearBuilt: opp.metadata?.year_built,
         maintenance: opp.metadata?.maintenance,
         taxes: opp.metadata?.taxes,
-        rentalIncome: opp.metadata?.rental_income
+        rentalIncome: opp.metadata?.rental_income,
+        // Franchise metadata
+        established: opp.metadata?.established,
+        territories: opp.metadata?.territories,
+        franchiseFee: opp.metadata?.franchise_fee,
+        royaltyFee: opp.metadata?.royalty_fee,
+        category: opp.category
       }));
 
       setApiOpportunities(prev => [...prev, ...convertedDbOpportunities]);
