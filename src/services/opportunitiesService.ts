@@ -41,7 +41,7 @@ export class OpportunitiesService {
         .from('opportunities')
         .select('*')
         .eq('status', 'active')
-        .in('source', ['demo_api', 'realty_in_ca', 'canada_real_estate_api', 'franchimp_api', 'web_scraper'])
+        .in('source', ['demo_api', 'realty_in_ca', 'canada_real_estate_api', 'franchimp_api', 'web_scraper', 'canadian_franchises'])
         .order('created_at', { ascending: false });
 
       if (filters?.type) {
