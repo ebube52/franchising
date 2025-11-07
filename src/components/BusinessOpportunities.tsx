@@ -83,7 +83,13 @@ export const BusinessOpportunities: React.FC = () => {
         category: opp.category
       }));
 
-      setApiOpportunities(prev => [...prev, ...convertedDbOpportunities]);
+      setApiOpportunities(prev => {
+        // Remove duplicates by ID
+        const existingIds = new Set(prev.map(o => o.id));
+        const newOpportunities = convertedDbOpportunities.filter(o => !existingIds.has(o.id));
+        console.log(`➕ Adding ${newOpportunities.length} new DB opportunities (${convertedDbOpportunities.length - newOpportunities.length} duplicates skipped)`);
+        return [...prev, ...newOpportunities];
+      });
       console.log(`✅ Loaded ${dbOpportunities.length} opportunities from database`);
 
       // Group by type for debugging
@@ -142,7 +148,13 @@ export const BusinessOpportunities: React.FC = () => {
         franchiseData: franchise
       }));
 
-      setApiOpportunities(prev => [...prev, ...convertedOpportunities]);
+      setApiOpportunities(prev => {
+        // Remove duplicates by ID
+        const existingIds = new Set(prev.map(o => o.id));
+        const newOpportunities = convertedOpportunities.filter(o => !existingIds.has(o.id));
+        console.log(`➕ Adding ${newOpportunities.length} new franchises (${convertedOpportunities.length - newOpportunities.length} duplicates skipped)`);
+        return [...prev, ...newOpportunities];
+      });
     } catch (error) {
       console.error('❌ Error loading franchise data:', error);
 
@@ -164,8 +176,12 @@ export const BusinessOpportunities: React.FC = () => {
         franchiseData: franchise
       }));
 
-      setApiOpportunities(prev => [...prev, ...fallbackOpportunities]);
-      console.log('🔄 Using fallback franchise data');
+      setApiOpportunities(prev => {
+        const existingIds = new Set(prev.map(o => o.id));
+        const newOpportunities = fallbackOpportunities.filter(o => !existingIds.has(o.id));
+        console.log(`🔄 Using fallback franchise data (${newOpportunities.length} new, ${fallbackOpportunities.length - newOpportunities.length} duplicates skipped)`);
+        return [...prev, ...newOpportunities];
+      });
     } finally {
       setIsLoadingAPI(false);
     }
@@ -255,7 +271,7 @@ export const BusinessOpportunities: React.FC = () => {
       franchiseData: franchise
     }));
     
-    // Add quiz results to the top of the list
+    // Add quiz results to the top of the list (no duplicate check needed - quiz IDs are prefixed)
     setApiOpportunities(prev => [...quizOpportunities, ...prev]);
     setSelectedCategory('Franchises'); // Switch to franchises to show results
   };
