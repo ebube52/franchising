@@ -148,35 +148,50 @@ export const BusinessOpportunities: React.FC = () => {
   };
 
   const filteredOpportunities = useMemo(() => {
+    console.log('🔍 Filtering opportunities:', {
+      category: selectedCategory,
+      totalOpportunities: apiOpportunities.length,
+      types: apiOpportunities.map(o => o.type)
+    });
+
     // Use only API opportunities (no mock data)
-    return apiOpportunities.filter(opportunity => {
+    const filtered = apiOpportunities.filter(opportunity => {
       const matchesSearch = opportunity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           opportunity.description.toLowerCase().includes(searchTerm.toLowerCase());
 
       // Category filtering
       let matchesCategory = false;
+      const oppType = opportunity.type?.toLowerCase() || '';
 
       if (selectedCategory === 'All Categories') {
         // Show only franchises and business opportunities (exclude real estate)
-        matchesCategory = opportunity.type === 'franchise' || opportunity.type === 'business';
+        matchesCategory = oppType === 'franchise' || oppType === 'business';
       } else if (selectedCategory === 'Franchises') {
-        // ONLY franchises
-        matchesCategory = opportunity.type === 'franchise';
+        // ONLY franchises - be very strict
+        matchesCategory = oppType === 'franchise';
       } else if (selectedCategory === 'Business Opportunities') {
         // ONLY business opportunities
-        matchesCategory = opportunity.type === 'business';
+        matchesCategory = oppType === 'business';
       } else if (selectedCategory === 'Real Estate') {
         // ONLY real estate
-        matchesCategory = opportunity.type === 'real_estate' || opportunity.type === 'real-estate';
+        matchesCategory = oppType === 'real_estate' || oppType === 'real-estate';
       } else {
         // Industry-specific categories (Food & Beverage, Retail, etc.)
         // These should ONLY show franchises with matching category
-        matchesCategory = opportunity.type === 'franchise' &&
+        matchesCategory = oppType === 'franchise' &&
                          opportunity.category === selectedCategory;
       }
 
-      return matchesSearch && matchesCategory;
+      const passes = matchesSearch && matchesCategory;
+      if (!passes && selectedCategory === 'Franchises') {
+        console.log('❌ Filtered out:', opportunity.title, 'type:', oppType);
+      }
+
+      return passes;
     });
+
+    console.log(`✅ Filtered to ${filtered.length} opportunities for category: ${selectedCategory}`);
+    return filtered;
   }, [searchTerm, selectedCategory, apiOpportunities]);
 
   const handleClearFilters = () => {
