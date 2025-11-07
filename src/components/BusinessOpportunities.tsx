@@ -4,10 +4,12 @@ import { OpportunityCard } from './OpportunityCard';
 import { FranchiseOpportunityCard } from './FranchiseOpportunityCard';
 import { FranchiseDetailModal } from './FranchiseDetailModal';
 import { FranchiseQuizModal } from './FranchiseQuizModal';
+import { FranchiseRequestForm, FranchiseRequestData } from './FranchiseRequestForm';
 import { VendorsPage } from './VendorsPage';
 import { canadianFranchiseAPI, searchCanadianFranchises } from '../services/canadianFranchiseAPI';
 import { allCanadianFranchises } from '../data/franchiseData';
 import { opportunitiesService } from '../services/opportunitiesService';
+import { supabase } from '../services/supabaseClient';
 
 // No mock data - using only real-time API listings
 
@@ -38,6 +40,8 @@ export const BusinessOpportunities: React.FC = () => {
   const [apiOpportunities, setApiOpportunities] = useState<any[]>([]);
   const [isLoadingAPI, setIsLoadingAPI] = useState(false);
   const [currentView, setCurrentView] = useState<'opportunities' | 'vendors' | 'messaging' | 'forum' | 'news'>('opportunities');
+  const [selectedFranchises, setSelectedFranchises] = useState<Set<string>>(new Set());
+  const [showRequestForm, setShowRequestForm] = useState(false);
 
   // Load franchise and real estate data from database and APIs
   React.useEffect(() => {
@@ -81,11 +85,25 @@ export const BusinessOpportunities: React.FC = () => {
 
       setApiOpportunities(prev => [...prev, ...convertedDbOpportunities]);
       console.log(`✅ Loaded ${dbOpportunities.length} opportunities from database`);
-      console.log('📊 Sample of loaded data:', convertedDbOpportunities.slice(0, 3).map(o => ({
-        title: o.title,
-        type: o.type,
-        category: o.category
-      })));
+
+      // Group by type for debugging
+      const typeGroups = convertedDbOpportunities.reduce((acc, opp) => {
+        const type = opp.type || 'undefined';
+        acc[type] = (acc[type] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
+      console.log('📊 Opportunities by type:', typeGroups);
+      console.log('📋 Sample franchises:', convertedDbOpportunities
+        .filter(o => o.type?.toLowerCase() === 'franchise')
+        .slice(0, 2)
+        .map(o => ({ title: o.title, type: o.type }))
+      );
+      console.log('🏠 Sample real estate:', convertedDbOpportunities
+        .filter(o => o.type?.toLowerCase()?.includes('real'))
+        .slice(0, 2)
+        .map(o => ({ title: o.title, type: o.type }))
+      );
     } catch (error) {
       console.error('❌ Error loading database opportunities:', error);
     }
@@ -235,6 +253,41 @@ export const BusinessOpportunities: React.FC = () => {
   const handlePartner = () => {
     // Handle partnership logic
     console.log('Partnership interest expressed');
+  };
+
+  const handleFranchiseRequestSubmit = async (formData: FranchiseRequestData) => {
+    try {
+      const selectedFranchisesList = Array.from(selectedFranchises).map(id => {
+        const opp = apiOpportunities.find(o => o.id === id);
+        return opp?.title || id;
+      });
+
+      const { error } = await supabase
+        .from('franchise_requests')
+        .insert({
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          city: formData.city,
+          province: formData.province,
+          postal_code: formData.postalCode,
+          email: formData.email,
+          phone: formData.phone,
+          desired_location: formData.desiredLocation,
+          available_capital: formData.availableCapital,
+          best_time_to_call: formData.bestTimeToCall,
+          subscribe_newsletter: formData.subscribe,
+          selected_franchises: selectedFranchisesList
+        });
+
+      if (error) throw error;
+
+      alert('Your franchise request has been submitted successfully!');
+      setShowRequestForm(false);
+      setSelectedFranchises(new Set());
+    } catch (error) {
+      console.error('Error submitting franchise request:', error);
+      alert('There was an error submitting your request. Please try again.');
+    }
   };
 
   return (
@@ -490,6 +543,18 @@ export const BusinessOpportunities: React.FC = () => {
                 key={opportunity.id}
                 opportunity={opportunity}
                 onLearnMore={() => setSelectedOpportunity(opportunity)}
+                onAddToRequest={(id, selected) => {
+                  setSelectedFranchises(prev => {
+                    const newSet = new Set(prev);
+                    if (selected) {
+                      newSet.add(id);
+                    } else {
+                      newSet.delete(id);
+                    }
+                    return newSet;
+                  });
+                }}
+                isSelected={selectedFranchises.has(opportunity.id)}
               />
             ) : (
               <OpportunityCard
@@ -556,6 +621,37 @@ export const BusinessOpportunities: React.FC = () => {
             onClose={() => setShowQuizModal(false)}
             onComplete={handleQuizComplete}
           />
+        )}
+
+        {showRequestForm && (
+          <FranchiseRequestForm
+            selectedFranchises={Array.from(selectedFranchises).map(id => {
+              const opp = apiOpportunities.find(o => o.id === id);
+              return {
+                id,
+                title: opp?.title || 'Unknown Franchise'
+              };
+            })}
+            onClose={() => setShowRequestForm(false)}
+            onSubmit={handleFranchiseRequestSubmit}
+          />
+        )}
+
+        {/* Sticky Bottom Bar */}
+        {selectedFranchises.size > 0 && (
+          <div className="fixed bottom-0 left-64 right-0 bg-red-800 text-white py-4 px-8 shadow-lg z-40">
+            <div className="max-w-7xl mx-auto flex items-center justify-between">
+              <span className="text-lg font-semibold">
+                {selectedFranchises.size} franchise(s) selected
+              </span>
+              <button
+                onClick={() => setShowRequestForm(true)}
+                className="px-6 py-2 bg-gray-900 text-white rounded font-semibold hover:bg-gray-800 transition-colors"
+              >
+                Complete request
+              </button>
+            </div>
+          </div>
         )}
           </>
         )}
