@@ -53,8 +53,8 @@ const kycRoutes = require('./routes/kyc');
 const paymentRoutes = require('./routes/payment');
 const contactFormRoutes = require('./routes/contactForm');
 const recommenderRoutes = require('./routes/recommender');
-
-
+const franchiseRoutes = require('./routes/franchise');
+const realEstateRoutes = require('./routes/realEstate');
 
 const app = express()
 
@@ -155,6 +155,8 @@ app.use(versionOne('kyc'), kycRoutes)
 app.use(versionOne('payment'), paymentRoutes)
 app.use(versionOne('contactForm'), contactFormRoutes)
 app.use(versionOne('recommender'), recommenderRoutes)
+app.use(versionOne('franchise'), franchiseRoutes)
+app.use(versionOne('realEstate'), realEstateRoutes)
 
 app.use(errorHandler)
 
