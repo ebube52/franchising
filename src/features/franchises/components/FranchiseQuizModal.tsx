@@ -60,7 +60,7 @@ const quizSteps: QuizStep[] = [
 ];
 
 // Import real franchise data
-import { getMatchingFranchises } from '../data/franchiseData';
+import { getMatchingFranchises } from '../franchiseData';
 import { FranchiseMatchRequest } from '../types/franchise';
 
 interface FranchiseQuizModalProps {

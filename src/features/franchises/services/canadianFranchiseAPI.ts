@@ -388,7 +388,7 @@ const getDefaultFranchiseImage = (category: string): string => {
 };
 
 // Import fallback data
-import { allCanadianFranchises } from '../data/franchiseData';
+import { allCanadianFranchises } from '../franchiseData';
 
 // Main API Service Class
 export class CanadianFranchiseAPIService {

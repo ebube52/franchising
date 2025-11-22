@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BusinessOpportunities } from './components/BusinessOpportunities';
-import { FranchiseAPIManager } from './components/FranchiseAPIManager';
+import { FranchiseAPIManager } from './features/franchises';
 import { Database, Home } from 'lucide-react';
 
 function App() {

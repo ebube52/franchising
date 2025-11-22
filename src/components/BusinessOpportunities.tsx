@@ -1,13 +1,17 @@
 import React, { useState, useMemo } from 'react';
 import { Search, ChevronDown, Users, Calendar, Building2, MessageSquare, Users2, Newspaper } from 'lucide-react';
 import { OpportunityCard } from './OpportunityCard';
-import { FranchiseOpportunityCard } from './FranchiseOpportunityCard';
-import { FranchiseDetailModal } from './FranchiseDetailModal';
-import { FranchiseQuizModal } from './FranchiseQuizModal';
-import { FranchiseRequestForm, FranchiseRequestData } from './FranchiseRequestForm';
+import {
+  FranchiseOpportunityCard,
+  FranchiseDetailModal,
+  FranchiseQuizModal,
+  FranchiseRequestForm,
+  canadianFranchiseAPI,
+  searchCanadianFranchises,
+  allCanadianFranchises,
+  type FranchiseRequestData
+} from '../features/franchises';
 import { VendorsPage } from './VendorsPage';
-import { canadianFranchiseAPI, searchCanadianFranchises } from '../services/canadianFranchiseAPI';
-import { allCanadianFranchises } from '../data/franchiseData';
 import { opportunitiesService } from '../services/opportunitiesService';
 import { supabase } from '../services/supabaseClient';
 

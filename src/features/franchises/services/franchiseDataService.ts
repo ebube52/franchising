@@ -1,7 +1,7 @@
 import { Franchise, FranchiseMatchRequest } from '../types/franchise';
 import { franchiseCacheService } from './franchiseCacheService';
 import { canadianFranchiseAPI } from './canadianFranchiseAPI';
-import { allCanadianFranchises } from '../data/franchiseData';
+import { allCanadianFranchises } from '../franchiseData';
 
 export class FranchiseDataService {
   private static instance: FranchiseDataService;

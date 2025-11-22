@@ -3,7 +3,7 @@ import { Database, RefreshCw, Download, TrendingUp, AlertCircle, CheckCircle, XC
 import { franchiseCacheService } from '../services/franchiseCacheService';
 import { canadianFranchiseAPI } from '../services/canadianFranchiseAPI';
 import { franchiseScraperService } from '../services/franchiseScraperService';
-import { allCanadianFranchises } from '../data/franchiseData';
+import { allCanadianFranchises } from '../franchiseData';
 
 interface APIStatus {
   name: string;

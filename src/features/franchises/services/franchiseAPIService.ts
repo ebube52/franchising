@@ -1,5 +1,5 @@
 import { Franchise, FranchiseMatchRequest } from '../types/franchise';
-import { franchiseAPIEndpoints } from '../data/franchiseData';
+import { franchiseAPIEndpoints } from '../franchiseData';
 
 // API Response interfaces for different providers
 interface CFAFranchise {

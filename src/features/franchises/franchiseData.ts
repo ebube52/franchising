@@ -1,4 +1,4 @@
-import { Franchise } from '../types/franchise';
+import { Franchise } from './types/franchise';
 
 // Streamlined Canadian franchises focused on 5 key categories
 export const canadianFranchises: Franchise[] = [
@@ -973,4 +973,32 @@ const calculateMatchScore = (franchise: Franchise, criteria: any): number => {
   }
   
   return Math.min(score, 100); // Cap at 100%
+};
+
+// API Endpoints Configuration
+export const franchiseAPIEndpoints = {
+  cfa: {
+    baseUrl: process.env.VITE_CFA_API_URL || '',
+    apiKey: process.env.VITE_CFA_API_KEY || '',
+    endpoints: {
+      search: '/franchises/search',
+      details: '/franchises'
+    }
+  },
+  beTheBoss: {
+    baseUrl: process.env.VITE_BETHEBOSS_API_URL || '',
+    apiKey: process.env.VITE_BETHEBOSS_API_KEY || '',
+    endpoints: {
+      search: '/opportunities/search',
+      details: '/opportunities'
+    }
+  },
+  franchiseDirect: {
+    baseUrl: process.env.VITE_FRANCHISE_DIRECT_API_URL || '',
+    apiKey: process.env.VITE_FRANCHISE_DIRECT_API_KEY || '',
+    endpoints: {
+      search: '/brands/search',
+      details: '/brands'
+    }
+  }
 };
