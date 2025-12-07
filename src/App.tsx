@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
 import { BusinessOpportunities } from './components/BusinessOpportunities';
 import { FranchiseAPIManager } from './features/franchises';
-import { Database, Home } from 'lucide-react';
+import BuyersAlikeDemo from './components/BuyersAlikeDemo';
+import { Database, Home, Store } from 'lucide-react';
 
 function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'admin'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'admin' | 'demo'>('demo');
+
+  if (currentView === 'demo') {
+    return <BuyersAlikeDemo />;
+  }
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -16,6 +21,14 @@ function App() {
             </div>
 
             <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentView('demo')}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors text-slate-600 hover:bg-slate-100"
+              >
+                <Store className="w-4 h-4" />
+                Demo
+              </button>
+
               <button
                 onClick={() => setCurrentView('home')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
